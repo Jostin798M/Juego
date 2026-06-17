@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrewManager | Detalle Pedido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-brew">
+    <div class="container">
+      <a class="navbar-brand" href="../pagina.html">☕ BrewManager</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../pagina.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html">Clientes</a></li>
+          <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+          <li class="nav-item"><a class="nav-link active" href="pedidos.html">Pedidos</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4" style="max-width:650px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="section-title mb-0">Detalle del Pedido</h3>
+      <a href="pedidos.html" class="btn btn-outline-secondary btn-sm">← Regresar</a>
+    </div>
+
+    <!-- Información general del pedido -->
+    <div class="card shadow-sm p-4 detalle-card mb-3" id="infoPedido">
+      <!-- Generado por JS -->
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="card shadow-sm p-4 mb-3">
+      <h5 style="color:var(--cafe-oscuro);">Productos del Pedido</h5>
+      <div id="listaProductos"><!-- Generado por JS --></div>
+      <hr>
+      <div class="total-pedido-box" id="totalBox"><!-- Generado por JS --></div>
+    </div>
+
+    <!-- Cambiar estado -->
+    <div class="d-flex gap-2" id="botonesEstado">
+      <!-- Generado por JS -->
+    </div>
+  </div>
+
+  <footer>
+    <p class="mb-0">© 2026 BrewManager — Sistema de Gestión Bar-Café</p>
+  </footer>
+
+  <script src="../js/datos.js"></script>
+  <script src="../js/pedidos.js"></script>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var idPedido = params.get('id');
+    var pedido = pedidos.find(function(p) { return p.id == idPedido; });
+
+    if (!pedido) {
+      document.getElementById('infoPedido').innerHTML =
+        '<p class="text-danger">Pedido no encontrado.</p>';
+    } else {
+      // Mapa de clases CSS para cada estado
+      var badgeMap = {
+        'pendiente':       'badge-pendiente',
+        'en preparación':  'badge-preparacion',
+        'entregado':       'badge-entregado',
+        'cancelado':       'badge-cancelado'
+      };
+      var badgeClase = badgeMap[pedido.estado] || 'bg-secondary';
+
+      // Renderizar información general
+      document.getElementById('infoPedido').innerHTML = `
+        <div class="row g-2">
+          <div class="col-6 d-flex"><span class="detalle-label">ID Pedido:</span>
+            <span class="detalle-valor ms-2">#${pedido.id}</span></div>
+          <div class="col-6 d-flex"><span class="detalle-label">Estado:</span>
+            <span class="badge ${badgeClase} ms-2 px-3 py-2">${pedido.estado.toUpperCase()}</span></div>
+          <div class="col-6 d-flex"><span class="detalle-label">Cliente:</span>
+            <span class="detalle-valor ms-2">${pedido.cliente || '—'}</span></div>
+          <div class="col-6 d-flex"><span class="detalle-label">Mesa:</span>
+            <span class="detalle-valor ms-2">${pedido.mesa ? 'Mesa ' + pedido.mesa : '—'}</span></div>
+          <div class="col-12 d-flex"><span class="detalle-label">Fecha:</span>
+            <span class="detalle-valor ms-2">${pedido.fecha}</span></div>
+        </div>
+      `;
+
+      // Renderizar lista de productos
+      var html = pedido.productos.map(function(p) {
+        return `<div class="producto-item d-flex justify-content-between">
+          <span>${p.nombre} <small class="text-muted">x${p.cantidad}</small></span>
+          <span>$${(p.precio * p.cantidad).toFixed(2)}</span>
+        </div>`;
+      }).join('');
+      document.getElementById('listaProductos').innerHTML = html;
+      document.getElementById('totalBox').textContent = 'Total: $' + pedido.total.toFixed(2);
+
+      // Flujo de estados: pendiente → en preparación → entregado
+      var flujoEstados = {
+        'pendiente':      'en preparación',
+        'en preparación': 'entregado'
+      };
+      var siguienteEstado = flujoEstados[pedido.estado];
+
+      var botonesHTML = '';
+      if (siguienteEstado) {
+        botonesHTML += `<button class="btn btn-brew-primary" onclick="avanzarEstado('${siguienteEstado}')">
+          🔄 Pasar a "${siguienteEstado}"</button>`;
+      }
+      if (pedido.estado !== 'cancelado' && pedido.estado !== 'entregado') {
+        botonesHTML += `<button class="btn btn-outline-danger ms-2" onclick="avanzarEstado('cancelado')">
+          ✕ Cancelar Pedido</button>`;
+      }
+      document.getElementById('botonesEstado').innerHTML = botonesHTML;
+    }
+
+    // Cambia el estado del pedido (simulado)
+    function avanzarEstado(nuevoEstado) {
+      if (confirm('¿Desea cambiar el estado del pedido a "' + nuevoEstado + '"?')) {
+        alert('✅ Estado actualizado a "' + nuevoEstado + '".');
+        window.location.href = 'pedidos.html';
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

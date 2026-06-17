@@ -1,216 +1,229 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mocca & Co. | Tu Pausa Diaria</title>
-    <style>
-        /* CSS - El diseño de tu cafetería */
-        :root {
-            --cafe-oscuro: #4b3621;
-            --cafe-claro: #a67b5b;
-            --crema: #f5f5dc;
-            --blanco: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: var(--crema);
-            color: var(--cafe-oscuro);
-        }
-
-        header {
-            background-color: var(--cafe-oscuro);
-            color: var(--blanco);
-            padding: 1rem;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 20px;
-        }
-
-        h2 {
-            text-align: center;
-            border-bottom: 2px solid var(--cafe-claro);
-            padding-bottom: 10px;
-        }
-
-        /* Rejilla de Productos */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .card {
-            background: var(--blanco);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-
-        .precio {
-            font-weight: bold;
-            color: var(--cafe-claro);
-            font-size: 1.2rem;
-        }
-
-        button {
-            background-color: var(--cafe-oscuro);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: var(--cafe-claro);
-        }
-
-        /* Carrito */
-        #carrito-seccion {
-            background: #fff;
-            padding: 20px;
-            margin-top: 30px;
-            border-radius: 15px;
-            border: 2px dashed var(--cafe-claro);
-        }
-
-        .item-carrito {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #eee;
-            padding: 5px 0;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 0.9rem;
-            color: gray;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrewManager — Dashboard</title>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/estilos.css" />
 </head>
 <body>
 
-<header>
-    <h1>☕ MOCCA & CO.</h1>
-    <p>Calidad en cada grano</p>
-</header>
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar navbar-expand-lg navbar-brew">
+    <div class="container">
+      <!-- Logo / Marca -->
+      <a class="navbar-brand" href="pagina.html">
+        <i class="bi bi-cup-hot-fill me-2"></i>BrewManager
+      </a>
+      <!-- Botón hamburguesa para móvil -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <!-- Menú de navegación -->
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="pagina.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="pages/clientes.html"><i class="bi bi-people me-1"></i>Clientes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="pages/productos.html"><i class="bi bi-bag me-1"></i>Productos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="pages/pedidos.html"><i class="bi bi-receipt me-1"></i>Pedidos</a>
+          </li>
+          <li class="nav-item ms-lg-3">
+            <a class="nav-link" href="pages/login.html"><i class="bi bi-box-arrow-right me-1"></i>Salir</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- /NAVBAR -->
 
-<div class="container">
-    <h2>Nuestro Menú</h2>
-    
-    <div class="menu-grid">
-        <!-- Producto 1 -->
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1510972527921-ce03766a1cf1?auto=format&fit=crop&w=300" alt="Espresso">
-            <h3>Espresso Italiano</h3>
-            <p>Puro, intenso y con cuerpo.</p>
-            <p class="precio">$2.50</p>
-            <button onclick="agregarAlCarrito('Espresso', 2.50)">Agregar al Carrito</button>
-        </div>
+  <!-- ===== CONTENIDO PRINCIPAL ===== -->
+  <main class="container py-5">
 
-        <!-- Producto 2 -->
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=300" alt="Cappuccino">
-            <h3>Cappuccino</h3>
-            <p>Doble capa de espuma cremosa.</p>
-            <p class="precio">$3.75</p>
-            <button onclick="agregarAlCarrito('Cappuccino', 3.75)">Agregar al Carrito</button>
-        </div>
+    <!-- Título de sección -->
+    <h2 class="section-title">
+      <i class="bi bi-speedometer2 me-2"></i>Dashboard
+    </h2>
+    <p class="text-muted mb-4">Resumen general del sistema — hoy <span id="fecha-hoy"></span></p>
 
-        <!-- Producto 3 -->
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=300" alt="Latte">
-            <h3>Caramel Latte</h3>
-            <p>Toque dulce de caramelo artesanal.</p>
-            <p class="precio">$4.50</p>
-            <button onclick="agregarAlCarrito('Caramel Latte', 4.50)">Agregar al Carrito</button>
+    <!-- ===== TARJETAS DE ESTADÍSTICAS ===== -->
+    <div class="row g-4 mb-5">
+
+      <!-- Tarjeta 1: Total ventas hoy -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-brew card-brew-primary p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="mb-1 fw-semibold opacity-75">Total Ventas Hoy</p>
+              <div class="card-number" id="stat-ventas">$0.00</div>
+            </div>
+            <span class="card-icon"><i class="bi bi-cash-stack"></i></span>
+          </div>
+          <p class="mt-3 mb-0 small opacity-75">Ingresos del día</p>
         </div>
+      </div>
+
+      <!-- Tarjeta 2: Pedidos activos -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-brew card-brew-secondary p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="mb-1 fw-semibold opacity-75">Pedidos Activos</p>
+              <div class="card-number" id="stat-pedidos">0</div>
+            </div>
+            <span class="card-icon"><i class="bi bi-receipt-cutoff"></i></span>
+          </div>
+          <p class="mt-3 mb-0 small opacity-75">Pendientes + En preparación</p>
+        </div>
+      </div>
+
+      <!-- Tarjeta 3: Clientes activos -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-brew card-brew-accent p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="mb-1 fw-semibold opacity-75">Clientes Activos</p>
+              <div class="card-number" id="stat-clientes">0</div>
+            </div>
+            <span class="card-icon"><i class="bi bi-person-check"></i></span>
+          </div>
+          <p class="mt-3 mb-0 small opacity-75">Registrados y activos</p>
+        </div>
+      </div>
+
+      <!-- Tarjeta 4: Productos disponibles -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-brew card-brew-light p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="mb-1 fw-semibold opacity-75">Productos Disponibles</p>
+              <div class="card-number" id="stat-productos">0</div>
+            </div>
+            <span class="card-icon"><i class="bi bi-bag-check"></i></span>
+          </div>
+          <p class="mt-3 mb-0 small opacity-75">En carta actualmente</p>
+        </div>
+      </div>
+
+    </div>
+    <!-- /TARJETAS -->
+
+    <!-- ===== ACCESOS RÁPIDOS ===== -->
+    <h4 class="section-title mt-4">Accesos Rápidos</h4>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <a href="pages/clientes.html" class="btn btn-brew-primary w-100 py-3">
+          <i class="bi bi-people-fill d-block fs-3 mb-1"></i>Clientes
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="pages/productos.html" class="btn btn-brew-primary w-100 py-3">
+          <i class="bi bi-bag-fill d-block fs-3 mb-1"></i>Productos
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="pages/pedidos.html" class="btn btn-brew-primary w-100 py-3">
+          <i class="bi bi-receipt d-block fs-3 mb-1"></i>Pedidos
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="pages/pedido-form.html" class="btn btn-brew-secondary w-100 py-3">
+          <i class="bi bi-plus-circle-fill d-block fs-3 mb-1"></i>Nuevo Pedido
+        </a>
+      </div>
     </div>
 
-    <!-- Sección del Carrito -->
-    <div id="carrito-seccion">
-        <h3>Tu Pedido</h3>
-        <div id="lista-carrito">
-            <p>El carrito está vacío.</p>
-        </div>
-        <hr>
-        <p><strong>Total: $<span id="total-precio">0.00</span></strong></p>
-        <button onclick="pagar()" style="width: 100%; background-color: #27ae60;">Finalizar Pedido</button>
+    <!-- ===== RESUMEN DE PEDIDOS RECIENTES ===== -->
+    <h4 class="section-title mt-5">Pedidos Recientes</h4>
+    <div class="table-responsive">
+      <table class="table table-brew table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente / Mesa</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-recientes">
+          <!-- Llenado por JS -->
+        </tbody>
+      </table>
     </div>
-</div>
 
-<footer>
-    &copy; 2026 Mocca & Co. - Guayaquil, Ecuador
-</footer>
+  </main>
+  <!-- /CONTENIDO -->
 
-<script>
-    // JavaScript - La lógica de compra
-    let carrito = [];
-    let total = 0;
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <p class="mb-0">&copy; 2024 BrewManager — Sistema de Gestión de Bar-Café</p>
+  </footer>
 
-    function agregarAlCarrito(nombre, precio) {
-        carrito.push({nombre, precio});
-        total += precio;
-        actualizarInterfaz();
-    }
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Datos simulados -->
+  <script src="js/datos.js"></script>
+  <!-- Script del dashboard -->
+  <script>
+    // ===== MOSTRAR FECHA DE HOY =====
+    var hoy = new Date();
+    document.getElementById("fecha-hoy").textContent = hoy.toLocaleDateString("es-EC", {
+      weekday: "long", year: "numeric", month: "long", day: "numeric"
+    });
 
-    function actualizarInterfaz() {
-        const lista = document.getElementById('lista-carrito');
-        const totalTxt = document.getElementById('total-precio');
-        
-        if (carrito.length === 0) {
-            lista.innerHTML = '<p>El carrito está vacío.</p>';
-        } else {
-            lista.innerHTML = '';
-            carrito.forEach((item, index) => {
-                lista.innerHTML += `
-                    <div class="item-carrito">
-                        <span>${item.nombre}</span>
-                        <span>$${item.precio.toFixed(2)}</span>
-                    </div>
-                `;
-            });
-        }
-        totalTxt.innerText = total.toFixed(2);
-    }
+    // ===== CALCULAR ESTADÍSTICAS =====
+    // Total de ventas (pedidos entregados)
+    var totalVentas = pedidos
+      .filter(function(p) { return p.estado === "entregado"; })
+      .reduce(function(acc, p) { return acc + p.total; }, 0);
+    document.getElementById("stat-ventas").textContent = "$" + totalVentas.toFixed(2);
 
-    function pagar() {
-        if (carrito.length === 0) {
-            alert("¡Aún no has elegido ningún café!");
-        } else {
-            alert("¡Gracias por tu compra! Tu café estará listo en 5 minutos.");
-            carrito = [];
-            total = 0;
-            actualizarInterfaz();
-        }
-    }
-</script>
+    // Pedidos activos (pendiente + en preparación)
+    var pedidosActivos = pedidos.filter(function(p) {
+      return p.estado === "pendiente" || p.estado === "en preparación";
+    }).length;
+    document.getElementById("stat-pedidos").textContent = pedidosActivos;
+
+    // Clientes activos
+    var clientesActivos = clientes.filter(function(c) { return c.estado === "activo"; }).length;
+    document.getElementById("stat-clientes").textContent = clientesActivos;
+
+    // Productos disponibles
+    var productosDisponibles = productos.filter(function(p) { return p.disponible; }).length;
+    document.getElementById("stat-productos").textContent = productosDisponibles;
+
+    // ===== TABLA DE PEDIDOS RECIENTES =====
+    var tbody = document.getElementById("tbody-recientes");
+    pedidos.slice(0, 4).forEach(function(p) {
+      var origen = p.cliente ? p.cliente : "Mesa " + p.mesa;
+      var badgesMap = {
+        "pendiente": "badge-pendiente",
+        "en preparación": "badge-preparacion",
+        "entregado": "badge-entregado",
+        "cancelado": "badge-cancelado"
+      };
+      var badgeClase = badgesMap[p.estado] || "badge-pendiente";
+      tbody.innerHTML += '<tr>' +
+        '<td>#' + p.id + '</td>' +
+        '<td>' + origen + '</td>' +
+        '<td>$' + p.total.toFixed(2) + '</td>' +
+        '<td><span class="badge ' + badgeClase + '">' + p.estado + '</span></td>' +
+        '<td>' + p.fecha + '</td>' +
+      '</tr>';
+    });
+  </script>
 
 </body>
 </html>

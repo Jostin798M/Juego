@@ -1,0 +1,317 @@
+/* BrewManager - Estilos personalizados */
+/* Variables de colores café */
+:root {
+  --cafe-oscuro: #4b3621;
+  --cafe-claro: #a67b5b;
+  --cafe-crema: #f5f5dc;
+  --cafe-medio: #7a5c3e;
+  --cafe-hover: #3a2818;
+  --blanco: #ffffff;
+  --texto-oscuro: #2c1a0e;
+}
+
+/* ===== BODY ===== */
+body {
+  background-color: #f9f6f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--texto-oscuro);
+}
+
+/* ===== NAVBAR ===== */
+.navbar-brew {
+  background-color: var(--cafe-oscuro) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.navbar-brew .navbar-brand {
+  color: var(--cafe-crema) !important;
+  font-weight: bold;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+}
+
+.navbar-brew .nav-link {
+  color: var(--cafe-crema) !important;
+  font-weight: 500;
+  transition: color 0.2s;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.navbar-brew .nav-link:hover,
+.navbar-brew .nav-link.active {
+  color: var(--cafe-oscuro) !important;
+  background-color: var(--cafe-crema);
+}
+
+.navbar-brew .navbar-toggler {
+  border-color: var(--cafe-crema);
+}
+
+.navbar-brew .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+/* ===== DASHBOARD - TARJETAS ===== */
+.card-brew {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(75,54,33,0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-brew:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(75,54,33,0.25);
+}
+
+.card-brew-primary {
+  background: linear-gradient(135deg, var(--cafe-oscuro), var(--cafe-medio));
+  color: var(--cafe-crema);
+}
+
+.card-brew-secondary {
+  background: linear-gradient(135deg, var(--cafe-claro), #c49a6c);
+  color: var(--blanco);
+}
+
+.card-brew-accent {
+  background: linear-gradient(135deg, #6b4c2a, var(--cafe-claro));
+  color: var(--cafe-crema);
+}
+
+.card-brew-light {
+  background: linear-gradient(135deg, var(--cafe-crema), #e8e4d0);
+  color: var(--cafe-oscuro);
+}
+
+.card-brew .card-icon {
+  font-size: 2.5rem;
+  opacity: 0.85;
+}
+
+.card-brew .card-number {
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+
+/* ===== TABLAS ===== */
+.table-brew thead {
+  background-color: var(--cafe-oscuro);
+  color: var(--cafe-crema);
+}
+
+.table-brew thead th {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: none;
+  padding: 0.9rem 1rem;
+}
+
+.table-brew tbody tr {
+  transition: background-color 0.15s;
+}
+
+.table-brew tbody tr:hover {
+  background-color: rgba(166,123,91,0.1);
+}
+
+.table-brew tbody td {
+  vertical-align: middle;
+  padding: 0.75rem 1rem;
+  border-color: #e0d5c5;
+}
+
+/* ===== BADGES DE ESTADO ===== */
+.badge-activo {
+  background-color: #198754;
+  color: #fff;
+}
+
+.badge-inactivo {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.badge-pendiente {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.badge-preparacion {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.badge-entregado {
+  background-color: #198754;
+  color: #fff;
+}
+
+.badge-cancelado {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.badge-disponible {
+  background-color: #198754;
+  color: #fff;
+}
+
+.badge-nodisponible {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+/* ===== BOTONES PERSONALIZADOS ===== */
+.btn-brew-primary {
+  background-color: var(--cafe-oscuro);
+  color: var(--cafe-crema);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-brew-primary:hover {
+  background-color: var(--cafe-hover);
+  color: var(--cafe-crema);
+  transform: translateY(-1px);
+}
+
+.btn-brew-secondary {
+  background-color: var(--cafe-claro);
+  color: var(--blanco);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-brew-secondary:hover {
+  background-color: var(--cafe-medio);
+  color: var(--blanco);
+}
+
+/* ===== FORMULARIOS ===== */
+.form-brew .form-label {
+  font-weight: 600;
+  color: var(--cafe-oscuro);
+}
+
+.form-brew .form-control:focus,
+.form-brew .form-select:focus {
+  border-color: var(--cafe-claro);
+  box-shadow: 0 0 0 0.2rem rgba(166,123,91,0.25);
+}
+
+.form-brew .error-msg {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: none;
+}
+
+.form-brew .error-msg.visible {
+  display: block;
+}
+
+/* ===== SECCIÓN TÍTULO ===== */
+.section-title {
+  color: var(--cafe-oscuro);
+  font-weight: bold;
+  border-left: 4px solid var(--cafe-claro);
+  padding-left: 12px;
+  margin-bottom: 1.5rem;
+}
+
+/* ===== BUSCADOR ===== */
+.buscador-brew {
+  border: 2px solid var(--cafe-claro);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: border-color 0.2s;
+}
+
+.buscador-brew:focus {
+  border-color: var(--cafe-oscuro);
+  box-shadow: 0 0 0 0.2rem rgba(75,54,33,0.15);
+  outline: none;
+}
+
+/* ===== LOGIN ===== */
+.login-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(75,54,33,0.25);
+}
+
+.login-header {
+  background: linear-gradient(135deg, var(--cafe-oscuro), var(--cafe-medio));
+  color: var(--cafe-crema);
+  border-radius: 16px 16px 0 0;
+  padding: 2rem;
+  text-align: center;
+}
+
+.login-header h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* ===== DETALLE CLIENTE/PEDIDO ===== */
+.detalle-card {
+  border-left: 4px solid var(--cafe-claro);
+  border-radius: 0 8px 8px 0;
+  background-color: var(--cafe-crema);
+}
+
+.detalle-label {
+  font-weight: 600;
+  color: var(--cafe-oscuro);
+  min-width: 180px;
+}
+
+.detalle-valor {
+  color: var(--texto-oscuro);
+}
+
+/* ===== PEDIDO FORM - LISTA PRODUCTOS ===== */
+.producto-item {
+  background-color: var(--cafe-crema);
+  border-radius: 8px;
+  border: 1px solid #ddd0ba;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+
+.total-pedido-box {
+  background: linear-gradient(135deg, var(--cafe-oscuro), var(--cafe-medio));
+  color: var(--cafe-crema);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: right;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background-color: var(--cafe-oscuro);
+  color: var(--cafe-crema);
+  padding: 1rem 0;
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 576px) {
+  .card-brew .card-number {
+    font-size: 1.6rem;
+  }
+  .section-title {
+    font-size: 1.2rem;
+  }
+}

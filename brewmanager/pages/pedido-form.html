@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrewManager | Nuevo Pedido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-brew">
+    <div class="container">
+      <a class="navbar-brand" href="../pagina.html">☕ BrewManager</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../pagina.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html">Clientes</a></li>
+          <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+          <li class="nav-item"><a class="nav-link active" href="pedidos.html">Pedidos</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4" style="max-width:750px;">
+    <h3 class="section-title">Registrar Nuevo Pedido</h3>
+
+    <div class="card p-4 shadow-sm form-brew">
+      <div class="row g-3">
+
+        <!-- Selección de cliente -->
+        <div class="col-md-6">
+          <label class="form-label">Cliente <span class="text-muted">(opcional si hay mesa)</span></label>
+          <select id="clientePedido" class="form-select">
+            <option value="">-- Sin cliente --</option>
+          </select>
+        </div>
+
+        <!-- Número de mesa -->
+        <div class="col-md-6">
+          <label class="form-label">Mesa <span class="text-muted">(opcional si hay cliente)</span></label>
+          <input type="number" id="mesa" class="form-control" min="1" placeholder="Ej: 5">
+        </div>
+
+        <!-- Mensaje si no se selecciona ni cliente ni mesa -->
+        <div class="col-12">
+          <div class="error-msg" id="err-destino">Debe seleccionar un cliente o ingresar un número de mesa.</div>
+        </div>
+
+        <!-- Selección de productos -->
+        <div class="col-12">
+          <label class="form-label">Agregar Producto <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <select id="selectorProducto" class="form-select">
+              <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button class="btn btn-brew-secondary" type="button" onclick="agregarProducto()">+ Agregar</button>
+          </div>
+          <div class="error-msg" id="err-productos">Debe agregar al menos un producto.</div>
+        </div>
+
+        <!-- Lista de productos del pedido -->
+        <div class="col-12" id="listaProductosPedido">
+          <!-- Los productos agregados aparecen aquí -->
+        </div>
+
+        <!-- Total calculado -->
+        <div class="col-12">
+          <div class="total-pedido-box">
+            Total: $<span id="totalPedido">0.00</span>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button class="btn btn-brew-primary px-4" onclick="confirmarPedido()">✅ Confirmar Pedido</button>
+          <a href="pedidos.html" class="btn btn-outline-secondary px-4">Cancelar</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p class="mb-0">© 2026 BrewManager — Sistema de Gestión Bar-Café</p>
+  </footer>
+
+  <script src="../js/datos.js"></script>
+  <script src="../js/pedidos.js"></script>
+  <script>
+    // Array que guarda los productos del pedido actual
+    var productosPedido = [];
+
+    // Llenar el select de clientes con datos simulados
+    var selectCliente = document.getElementById('clientePedido');
+    clientes.forEach(function(c) {
+      if (c.estado === 'activo') {
+        var opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.nombres + ' ' + c.apellidos;
+        selectCliente.appendChild(opt);
+      }
+    });
+
+    // Llenar el select de productos disponibles
+    var selectProd = document.getElementById('selectorProducto');
+    productos.forEach(function(p) {
+      if (p.disponible) {
+        var opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.nombre + ' — $' + p.precio.toFixed(2);
+        selectProd.appendChild(opt);
+      }
+    });
+
+    // Agrega un producto a la lista del pedido
+    function agregarProducto() {
+      var idProd = document.getElementById('selectorProducto').value;
+      if (!idProd) return;
+
+      var prod = productos.find(function(p) { return p.id == idProd; });
+      if (!prod) return;
+
+      // Verificar si ya está en el pedido y aumentar cantidad
+      var existente = productosPedido.find(function(p) { return p.id == idProd; });
+      if (existente) {
+        existente.cantidad++;
+      } else {
+        productosPedido.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
+      }
+
+      renderListaProductos();
+    }
+
+    // Quita un producto de la lista
+    function quitarProducto(id) {
+      productosPedido = productosPedido.filter(function(p) { return p.id != id; });
+      renderListaProductos();
+    }
+
+    // Renderiza la lista de productos del pedido y calcula el total
+    function renderListaProductos() {
+      var lista = document.getElementById('listaProductosPedido');
+      var total = 0;
+
+      if (productosPedido.length === 0) {
+        lista.innerHTML = '<p class="text-muted">No ha agregado productos aún.</p>';
+      } else {
+        lista.innerHTML = productosPedido.map(function(p) {
+          var subtotal = p.precio * p.cantidad;
+          total += subtotal;
+          return `<div class="producto-item d-flex justify-content-between align-items-center">
+            <span>${p.nombre} x${p.cantidad}</span>
+            <span>$${subtotal.toFixed(2)}</span>
+            <button class="btn btn-sm btn-outline-danger" onclick="quitarProducto(${p.id})">✕</button>
+          </div>`;
+        }).join('');
+      }
+
+      document.getElementById('totalPedido').textContent = total.toFixed(2);
+    }
+
+    // Valida y confirma el pedido
+    function confirmarPedido() {
+      // Limpiar errores
+      document.getElementById('err-destino').classList.remove('visible');
+      document.getElementById('err-productos').classList.remove('visible');
+
+      var valido = true;
+      var cliente = document.getElementById('clientePedido').value;
+      var mesa = document.getElementById('mesa').value.trim();
+
+      // Debe haber cliente o mesa
+      if (!cliente && !mesa) {
+        document.getElementById('err-destino').classList.add('visible');
+        valido = false;
+      }
+
+      // Debe haber al menos un producto
+      if (productosPedido.length === 0) {
+        document.getElementById('err-productos').classList.add('visible');
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      alert('✅ Pedido registrado correctamente.');
+      window.location.href = 'pedidos.html';
+    }
+
+    // Inicializar lista vacía
+    renderListaProductos();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
