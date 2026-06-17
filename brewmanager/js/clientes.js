@@ -235,6 +235,37 @@ function guardarCliente(event) {
   }
 
   if (valido) {
+    var params = new URLSearchParams(window.location.search);
+    var id = parseInt(params.get("id"));
+
+    var datos = {
+      nombres:      document.getElementById("f-nombres").value.trim(),
+      apellidos:    document.getElementById("f-apellidos").value.trim(),
+      identificacion: document.getElementById("f-identificacion").value.trim(),
+      telefono:     document.getElementById("f-telefono").value.trim(),
+      celular:      document.getElementById("f-celular").value.trim(),
+      correo:       document.getElementById("f-correo").value.trim(),
+      direccion:    document.getElementById("f-direccion") ? document.getElementById("f-direccion").value.trim() : "",
+      estadoCivil:  document.getElementById("f-estadoCivil").value,
+      estado:       document.getElementById("f-estado").value,
+      fecha_registro: new Date().toISOString().slice(0, 10)
+    };
+
+    if (id) {
+      // Edición: actualizar el objeto existente
+      var idx = clientes.findIndex(function(c) { return c.id === id; });
+      if (idx !== -1) {
+        datos.id = id;
+        datos.fecha_registro = clientes[idx].fecha_registro;
+        clientes[idx] = datos;
+      }
+    } else {
+      // Creación: asignar nuevo ID
+      var maxId = clientes.reduce(function(m, c) { return c.id > m ? c.id : m; }, 0);
+      datos.id = maxId + 1;
+      clientes.push(datos);
+    }
+
     guardarStorage("clientes");
     alert("Cliente guardado correctamente.");
     window.location.href = "clientes.html";
