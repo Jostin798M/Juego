@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrewManager — Tomar Pedido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-brew">
+    <div class="container">
+      <a class="navbar-brand" href="mesero-mesas.html"><i class="bi bi-cup-hot-fill me-2"></i>BrewManager</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="mesero-mesas.html"><i class="bi bi-grid me-1"></i>Mesas</a></li>
+          <li class="nav-item"><a class="nav-link" href="mesero-mis-pedidos.html"><i class="bi bi-receipt me-1"></i>Mis Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" href="mesero-menu.html"><i class="bi bi-bag me-1"></i>Ver Carta</a></li>
+          <li class="nav-item ms-lg-3"><a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right me-1"></i>Salir</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-9 col-lg-7">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="section-title mb-0"><i class="bi bi-plus-circle me-2"></i>Tomar Pedido</h2>
+          <a href="mesero-mesas.html" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Volver
+          </a>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <form id="form-pedido-mesero" class="form-brew" novalidate onsubmit="guardarPedidoMesero(event)">
+
+              <div class="mb-3">
+                <label for="m-tipo" class="form-label">Tipo de Pedido <span class="text-danger">*</span></label>
+                <select id="m-tipo" class="form-select" onchange="toggleTipoPedidoMesero()">
+                  <option value="">-- Seleccione --</option>
+                  <option value="mesa">Para una mesa</option>
+                  <option value="cliente">Para un cliente registrado</option>
+                </select>
+              </div>
+
+              <div id="bloque-mesa-m" class="mb-3" style="display:none;">
+                <label for="m-mesa" class="form-label">Número de Mesa <span class="text-danger">*</span></label>
+                <input type="number" id="m-mesa" class="form-control" placeholder="Ej: 3" min="1" />
+              </div>
+
+              <div id="bloque-cliente-m" class="mb-3" style="display:none;">
+                <label for="m-cliente" class="form-label">Cliente <span class="text-danger">*</span></label>
+                <select id="m-cliente" class="form-select">
+                  <option value="">-- Seleccione un cliente --</option>
+                </select>
+              </div>
+
+              <hr />
+
+              <h5 class="mb-3" style="color: var(--cafe-oscuro);">
+                <i class="bi bi-bag-plus me-2"></i>Agregar Productos
+              </h5>
+
+              <div class="row g-2 mb-3 align-items-end">
+                <div class="col-12 col-sm-6">
+                  <label for="m-producto" class="form-label">Producto</label>
+                  <select id="m-producto" class="form-select">
+                    <option value="">-- Seleccione --</option>
+                  </select>
+                </div>
+                <div class="col-6 col-sm-3">
+                  <label for="m-cantidad" class="form-label">Cantidad</label>
+                  <input type="number" id="m-cantidad" class="form-control" value="1" min="1" max="99" />
+                </div>
+                <div class="col-6 col-sm-3">
+                  <button type="button" class="btn btn-brew-secondary w-100" onclick="agregarProductoMesero()">
+                    <i class="bi bi-plus-lg me-1"></i>Agregar
+                  </button>
+                </div>
+              </div>
+
+              <div id="lista-productos-mesero" class="mb-3">
+                <p class="text-muted small">No ha agregado productos.</p>
+              </div>
+
+              <div class="total-pedido-box mb-4">
+                Total: <span id="total-mesero">$0.00</span>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-brew-primary px-4">
+                  <i class="bi bi-check-circle me-1"></i>Confirmar Pedido
+                </button>
+                <a href="mesero-mesas.html" class="btn btn-outline-secondary px-4">
+                  <i class="bi bi-x-circle me-1"></i>Cancelar
+                </a>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer><p class="mb-0">&copy; 2024 BrewManager</p></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/datos.js"></script>
+  <script src="../js/mesero.js"></script>
+  <script>iniciarFormPedidoMesero();</script>
+</body>
+</html>

@@ -98,7 +98,9 @@
             </form>
 
             <p class="text-center text-muted mt-3 small">
-              <i class="bi bi-info-circle me-1"></i>Usuario: <strong>admin</strong> / Clave: <strong>1234</strong>
+              <i class="bi bi-info-circle me-1"></i>
+              Admin: <strong>admin / 1234</strong> &nbsp;|&nbsp;
+              Mesero: <strong>mesero1 / 1234</strong>
             </p>
           </div>
         </div>
@@ -109,6 +111,7 @@
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/datos.js"></script>
   <script>
     // ===== MOSTRAR / OCULTAR CONTRASEÑA =====
     document.getElementById("btn-ver-pass").addEventListener("click", function() {
@@ -157,16 +160,21 @@
 
       // Si pasa validación, verificar credenciales
       if (valido) {
-        // Credenciales correctas: admin / 1234
-        if (usuario.value.trim() === "admin" && contrasena.value === "1234") {
-          // Redirigir al dashboard (pagina.html está un nivel arriba)
+        var u = usuario.value.trim();
+        var p = contrasena.value;
+        if (u === "admin" && p === "1234") {
           alert("¡Bienvenido, Administrador!");
           window.location.href = "../pagina.html";
         } else {
-          // Mostrar error de credenciales incorrectas
-          errorLogin.classList.remove("d-none");
-          usuario.classList.add("is-invalid");
-          contrasena.classList.add("is-invalid");
+          var mesero = meseros.find(function(m) { return m.usuario === u && m.clave === p; });
+          if (mesero) {
+            alert("¡Bienvenido, " + mesero.nombre + "!");
+            window.location.href = "mesero-mesas.html";
+          } else {
+            errorLogin.classList.remove("d-none");
+            usuario.classList.add("is-invalid");
+            contrasena.classList.add("is-invalid");
+          }
         }
       }
     });

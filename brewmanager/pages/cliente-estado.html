@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrewManager — Estado de tu Pedido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-brew">
+    <div class="container">
+      <a class="navbar-brand" href="cliente-carta.html"><i class="bi bi-cup-hot-fill me-2"></i>BrewManager</a>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-7 col-lg-5">
+        <h2 class="section-title text-center"><i class="bi bi-receipt me-2"></i>Estado de tu Pedido</h2>
+        <div id="estado-contenido">
+          <div class="text-center py-5 text-muted">Cargando...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><p class="mb-0">&copy; 2024 BrewManager</p></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/datos.js"></script>
+  <script src="../js/cliente-publico.js"></script>
+  <script>cargarEstadoPedidoCliente();</script>
+</body>
+</html>

@@ -315,3 +315,10 @@ footer {
     font-size: 1.2rem;
   }
 }
+
+/* ===== MÓDULO MESERO: MESAS ===== */
+.mesa-card { border-radius: 12px; border: 2px solid transparent; transition: transform .2s, box-shadow .2s; }
+.mesa-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(75,54,33,.2); }
+.mesa-libre { background: #f0fdf4; border-color: #22c55e; }
+.mesa-ocupada { background: #fff7ed; border-color: var(--cafe-claro); }
+.mesa-numero { font-size: 1.4rem; font-weight: 700; color: var(--cafe-oscuro); margin-bottom: .25rem; }

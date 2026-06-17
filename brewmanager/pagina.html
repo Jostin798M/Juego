@@ -120,8 +120,8 @@
     <!-- /TARJETAS -->
 
     <!-- ===== ACCESOS RÁPIDOS ===== -->
-    <h4 class="section-title mt-4">Accesos Rápidos</h4>
-    <div class="row g-3">
+    <h4 class="section-title mt-4">Administración</h4>
+    <div class="row g-3 mb-4">
       <div class="col-6 col-md-3">
         <a href="pages/clientes.html" class="btn btn-brew-primary w-100 py-3">
           <i class="bi bi-people-fill d-block fs-3 mb-1"></i>Clientes
@@ -140,6 +140,20 @@
       <div class="col-6 col-md-3">
         <a href="pages/pedido-form.html" class="btn btn-brew-secondary w-100 py-3">
           <i class="bi bi-plus-circle-fill d-block fs-3 mb-1"></i>Nuevo Pedido
+        </a>
+      </div>
+    </div>
+
+    <h4 class="section-title mt-2">Módulos de Servicio</h4>
+    <div class="row g-3">
+      <div class="col-6 col-md-4">
+        <a href="pages/mesero-mesas.html" class="btn btn-brew-secondary w-100 py-3">
+          <i class="bi bi-grid-fill d-block fs-3 mb-1"></i>Módulo Mesero
+        </a>
+      </div>
+      <div class="col-6 col-md-4">
+        <a href="pages/cliente-carta.html" class="btn btn-outline-secondary w-100 py-3" style="border-color:var(--cafe-claro);color:var(--cafe-oscuro);">
+          <i class="bi bi-book d-block fs-3 mb-1"></i>Módulo Cliente
         </a>
       </div>
     </div>
@@ -173,61 +187,55 @@
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/api.js"></script>
+  <!-- Datos simulados -->
+  <script src="js/datos.js"></script>
+  <!-- Script del dashboard -->
   <script>
+    // ===== MOSTRAR FECHA DE HOY =====
     var hoy = new Date();
     document.getElementById("fecha-hoy").textContent = hoy.toLocaleDateString("es-EC", {
       weekday: "long", year: "numeric", month: "long", day: "numeric"
     });
 
-    var badgesMap = {
-      "pendiente": "badge-pendiente",
-      "en preparación": "badge-preparacion",
-      "entregado": "badge-entregado",
-      "cancelado": "badge-cancelado"
-    };
+    // ===== CALCULAR ESTADÍSTICAS =====
+    // Total de ventas (pedidos entregados)
+    var totalVentas = pedidos
+      .filter(function(p) { return p.estado === "entregado"; })
+      .reduce(function(acc, p) { return acc + p.total; }, 0);
+    document.getElementById("stat-ventas").textContent = "$" + totalVentas.toFixed(2);
 
-    Promise.all([
-      apiGet("/clientes/"),
-      apiGet("/productos/"),
-      apiGet("/pedidos/")
-    ]).then(function(resultados) {
-      var clientes = resultados[0];
-      var productos = resultados[1];
-      var pedidos = resultados[2];
+    // Pedidos activos (pendiente + en preparación)
+    var pedidosActivos = pedidos.filter(function(p) {
+      return p.estado === "pendiente" || p.estado === "en preparación";
+    }).length;
+    document.getElementById("stat-pedidos").textContent = pedidosActivos;
 
-      var totalVentas = pedidos
-        .filter(function(p) { return p.estado === "entregado"; })
-        .reduce(function(acc, p) { return acc + parseFloat(p.total); }, 0);
-      document.getElementById("stat-ventas").textContent = "$" + totalVentas.toFixed(2);
+    // Clientes activos
+    var clientesActivos = clientes.filter(function(c) { return c.estado === "activo"; }).length;
+    document.getElementById("stat-clientes").textContent = clientesActivos;
 
-      document.getElementById("stat-pedidos").textContent = pedidos.filter(function(p) {
-        return p.estado === "pendiente" || p.estado === "en preparación";
-      }).length;
+    // Productos disponibles
+    var productosDisponibles = productos.filter(function(p) { return p.disponible; }).length;
+    document.getElementById("stat-productos").textContent = productosDisponibles;
 
-      document.getElementById("stat-clientes").textContent =
-        clientes.filter(function(c) { return c.estado === "activo"; }).length;
-
-      document.getElementById("stat-productos").textContent =
-        productos.filter(function(p) { return p.disponible; }).length;
-
-      var tbody = document.getElementById("tbody-recientes");
-      pedidos.slice(0, 4).forEach(function(p) {
-        var origen = p.cliente_nombre || (p.mesa ? "Mesa " + p.mesa : "—");
-        var badgeClase = badgesMap[p.estado] || "badge-pendiente";
-        tbody.innerHTML += '<tr>' +
-          '<td>#' + p.id + '</td>' +
-          '<td>' + origen + '</td>' +
-          '<td>$' + parseFloat(p.total).toFixed(2) + '</td>' +
-          '<td><span class="badge ' + badgeClase + '">' + p.estado + '</span></td>' +
-          '<td>' + (p.fecha ? p.fecha.slice(0, 10) : "—") + '</td>' +
-        '</tr>';
-      });
-    }).catch(function() {
-      document.getElementById("stat-ventas").textContent = "—";
-      document.getElementById("stat-pedidos").textContent = "—";
-      document.getElementById("stat-clientes").textContent = "—";
-      document.getElementById("stat-productos").textContent = "—";
+    // ===== TABLA DE PEDIDOS RECIENTES =====
+    var tbody = document.getElementById("tbody-recientes");
+    pedidos.slice(0, 4).forEach(function(p) {
+      var origen = p.cliente ? p.cliente : "Mesa " + p.mesa;
+      var badgesMap = {
+        "pendiente": "badge-pendiente",
+        "en preparación": "badge-preparacion",
+        "entregado": "badge-entregado",
+        "cancelado": "badge-cancelado"
+      };
+      var badgeClase = badgesMap[p.estado] || "badge-pendiente";
+      tbody.innerHTML += '<tr>' +
+        '<td>#' + p.id + '</td>' +
+        '<td>' + origen + '</td>' +
+        '<td>$' + p.total.toFixed(2) + '</td>' +
+        '<td><span class="badge ' + badgeClase + '">' + p.estado + '</span></td>' +
+        '<td>' + p.fecha + '</td>' +
+      '</tr>';
     });
   </script>
 
