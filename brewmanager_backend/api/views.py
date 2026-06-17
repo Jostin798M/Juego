@@ -1,189 +1,95 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
-import json
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-from .models import Cliente, Producto, Pedido, DetallePedido
+from .models import Cliente, Producto, Pedido
+from .serializers import (
+    ClienteSerializer,
+    ProductoSerializer,
+    PedidoSerializer,
+    PedidoCreateSerializer,
+)
 
-
-# ===== CLIENTES =====
-
-@csrf_exempt
-def lista_clientes(request):
-    if request.method == "GET":
-        data = list(Cliente.objects.values(
-            "id", "nombres", "apellidos", "identificacion",
-            "telefono", "celular", "correo", "direccion",
-            "estado_civil", "estado", "fecha_registro"
-        ))
-        return JsonResponse(data, safe=False)
-
-    if request.method == "POST":
-        body = json.loads(request.body)
-        cliente = Cliente.objects.create(**body)
-        return JsonResponse({"id": cliente.id, "mensaje": "Cliente creado."}, status=201)
-
-    return JsonResponse({"error": "Método no permitido."}, status=405)
+ESTADOS_PEDIDO = ["pendiente", "en preparación", "entregado", "cancelado"]
 
 
-@csrf_exempt
-def detalle_cliente(request, pk):
-    cliente = get_object_or_404(Cliente, pk=pk)
+class ClienteViewSet(viewsets.ModelViewSet):
+    queryset = Cliente.objects.all()
+    serializer_class = ClienteSerializer
 
-    if request.method == "GET":
-        data = {
-            "id": cliente.id,
-            "nombres": cliente.nombres,
-            "apellidos": cliente.apellidos,
-            "identificacion": cliente.identificacion,
-            "telefono": cliente.telefono,
-            "celular": cliente.celular,
-            "correo": cliente.correo,
-            "direccion": cliente.direccion,
-            "estado_civil": cliente.estado_civil,
-            "estado": cliente.estado,
-            "fecha_registro": cliente.fecha_registro,
-        }
-        return JsonResponse(data)
+    def get_queryset(self):
+        qs = super().get_queryset()
+        estado = self.request.query_params.get("estado")
+        if estado:
+            qs = qs.filter(estado=estado)
+        return qs
 
-    if request.method == "PUT":
-        body = json.loads(request.body)
-        for campo, valor in body.items():
-            setattr(cliente, campo, valor)
+    @action(detail=True, methods=["patch"], url_path="cambiar-estado")
+    def cambiar_estado(self, request, pk=None):
+        cliente = self.get_object()
+        nuevo = "inactivo" if cliente.estado == "activo" else "activo"
+        cliente.estado = nuevo
         cliente.save()
-        return JsonResponse({"mensaje": "Cliente actualizado."})
-
-    if request.method == "DELETE":
-        cliente.delete()
-        return JsonResponse({"mensaje": "Cliente eliminado."})
-
-    return JsonResponse({"error": "Método no permitido."}, status=405)
+        return Response({"id": cliente.id, "estado": cliente.estado})
 
 
-# ===== PRODUCTOS =====
+class ProductoViewSet(viewsets.ModelViewSet):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializer
 
-@csrf_exempt
-def lista_productos(request):
-    if request.method == "GET":
-        data = list(Producto.objects.values(
-            "id", "nombre", "descripcion", "categoria", "precio", "disponible"
-        ))
-        return JsonResponse(data, safe=False)
+    def get_queryset(self):
+        qs = super().get_queryset()
+        categoria = self.request.query_params.get("categoria")
+        disponible = self.request.query_params.get("disponible")
+        if categoria:
+            qs = qs.filter(categoria=categoria)
+        if disponible is not None:
+            qs = qs.filter(disponible=disponible.lower() == "true")
+        return qs
 
-    if request.method == "POST":
-        body = json.loads(request.body)
-        producto = Producto.objects.create(**body)
-        return JsonResponse({"id": producto.id, "mensaje": "Producto creado."}, status=201)
-
-    return JsonResponse({"error": "Método no permitido."}, status=405)
-
-
-@csrf_exempt
-def detalle_producto(request, pk):
-    producto = get_object_or_404(Producto, pk=pk)
-
-    if request.method == "GET":
-        data = {
-            "id": producto.id,
-            "nombre": producto.nombre,
-            "descripcion": producto.descripcion,
-            "categoria": producto.categoria,
-            "precio": str(producto.precio),
-            "disponible": producto.disponible,
-        }
-        return JsonResponse(data)
-
-    if request.method == "PUT":
-        body = json.loads(request.body)
-        for campo, valor in body.items():
-            setattr(producto, campo, valor)
+    @action(detail=True, methods=["patch"], url_path="cambiar-disponibilidad")
+    def cambiar_disponibilidad(self, request, pk=None):
+        producto = self.get_object()
+        producto.disponible = not producto.disponible
         producto.save()
-        return JsonResponse({"mensaje": "Producto actualizado."})
-
-    if request.method == "DELETE":
-        producto.delete()
-        return JsonResponse({"mensaje": "Producto eliminado."})
-
-    return JsonResponse({"error": "Método no permitido."}, status=405)
+        return Response({"id": producto.id, "disponible": producto.disponible})
 
 
-# ===== PEDIDOS =====
+class PedidoViewSet(viewsets.ModelViewSet):
+    queryset = Pedido.objects.select_related("cliente").prefetch_related("detalles__producto")
 
-@csrf_exempt
-def lista_pedidos(request):
-    if request.method == "GET":
-        pedidos = []
-        for p in Pedido.objects.select_related("cliente").prefetch_related("detalles__producto"):
-            pedidos.append({
-                "id": p.id,
-                "cliente": str(p.cliente) if p.cliente else None,
-                "mesa": p.mesa,
-                "estado": p.estado,
-                "total": str(p.total),
-                "fecha": p.fecha,
-                "detalles": [
-                    {
-                        "producto": d.producto.nombre,
-                        "cantidad": d.cantidad,
-                        "precio_unitario": str(d.precio_unitario),
-                        "subtotal": str(d.subtotal()),
-                    }
-                    for d in p.detalles.all()
-                ],
-            })
-        return JsonResponse(pedidos, safe=False)
+    def get_serializer_class(self):
+        if self.action in ["create"]:
+            return PedidoCreateSerializer
+        return PedidoSerializer
 
-    if request.method == "POST":
-        body = json.loads(request.body)
-        detalles = body.pop("detalles", [])
-        pedido = Pedido.objects.create(**body)
-        for det in detalles:
-            producto = get_object_or_404(Producto, pk=det["producto_id"])
-            DetallePedido.objects.create(
-                pedido=pedido,
-                producto=producto,
-                cantidad=det["cantidad"],
-                precio_unitario=producto.precio,
+    def get_queryset(self):
+        qs = super().get_queryset()
+        estado = self.request.query_params.get("estado")
+        if estado:
+            qs = qs.filter(estado=estado)
+        return qs
+
+    def create(self, request, *args, **kwargs):
+        serializer = PedidoCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        pedido = serializer.save()
+        return Response(PedidoSerializer(pedido).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["patch"], url_path="cambiar-estado")
+    def cambiar_estado(self, request, pk=None):
+        pedido = self.get_object()
+        nuevo_estado = request.data.get("estado")
+        if nuevo_estado not in ESTADOS_PEDIDO:
+            return Response(
+                {"error": f"Estado inválido. Opciones: {ESTADOS_PEDIDO}"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        pedido.calcular_total()
-        return JsonResponse({"id": pedido.id, "total": str(pedido.total), "mensaje": "Pedido creado."}, status=201)
-
-    return JsonResponse({"error": "Método no permitido."}, status=405)
-
-
-@csrf_exempt
-def detalle_pedido(request, pk):
-    pedido = get_object_or_404(Pedido, pk=pk)
-
-    if request.method == "GET":
-        data = {
-            "id": pedido.id,
-            "cliente": str(pedido.cliente) if pedido.cliente else None,
-            "mesa": pedido.mesa,
-            "estado": pedido.estado,
-            "total": str(pedido.total),
-            "fecha": pedido.fecha,
-            "detalles": [
-                {
-                    "producto": d.producto.nombre,
-                    "cantidad": d.cantidad,
-                    "precio_unitario": str(d.precio_unitario),
-                    "subtotal": str(d.subtotal()),
-                }
-                for d in pedido.detalles.select_related("producto")
-            ],
-        }
-        return JsonResponse(data)
-
-    if request.method == "PUT":
-        body = json.loads(request.body)
-        for campo, valor in body.items():
-            setattr(pedido, campo, valor)
+        if pedido.estado in ["entregado", "cancelado"]:
+            return Response(
+                {"error": f"El pedido ya está '{pedido.estado}' y no puede modificarse."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        pedido.estado = nuevo_estado
         pedido.save()
-        return JsonResponse({"mensaje": "Pedido actualizado."})
-
-    if request.method == "DELETE":
-        pedido.delete()
-        return JsonResponse({"mensaje": "Pedido eliminado."})
-
-    return JsonResponse({"error": "Método no permitido."}, status=405)
+        return Response({"id": pedido.id, "estado": pedido.estado})
