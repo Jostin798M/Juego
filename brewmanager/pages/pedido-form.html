@@ -1,201 +1,160 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BrewManager | Nuevo Pedido</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/estilos.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrewManager — Nuevo Pedido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/estilos.css" />
 </head>
 <body>
 
-  <!-- Navbar -->
+  <!-- ===== NAVBAR ===== -->
   <nav class="navbar navbar-expand-lg navbar-brew">
     <div class="container">
-      <a class="navbar-brand" href="../pagina.html">☕ BrewManager</a>
+      <a class="navbar-brand" href="../pagina.html"><i class="bi bi-cup-hot-fill me-2"></i>BrewManager</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="../pagina.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="clientes.html">Clientes</a></li>
-          <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
-          <li class="nav-item"><a class="nav-link active" href="pedidos.html">Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" href="../pagina.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html"><i class="bi bi-people me-1"></i>Clientes</a></li>
+          <li class="nav-item"><a class="nav-link" href="productos.html"><i class="bi bi-bag me-1"></i>Productos</a></li>
+          <li class="nav-item"><a class="nav-link active" href="pedidos.html"><i class="bi bi-receipt me-1"></i>Pedidos</a></li>
+          <li class="nav-item ms-lg-3"><a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right me-1"></i>Salir</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container mt-4" style="max-width:750px;">
-    <h3 class="section-title">Registrar Nuevo Pedido</h3>
+  <!-- ===== CONTENIDO ===== -->
+  <main class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-9 col-lg-8">
 
-    <div class="card p-4 shadow-sm form-brew">
-      <div class="row g-3">
+        <h2 class="section-title">Nuevo Pedido</h2>
 
-        <!-- Selección de cliente -->
-        <div class="col-md-6">
-          <label class="form-label">Cliente <span class="text-muted">(opcional si hay mesa)</span></label>
-          <select id="clientePedido" class="form-select">
-            <option value="">-- Sin cliente --</option>
-          </select>
-        </div>
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <form id="form-pedido" class="form-brew" novalidate onsubmit="guardarPedido(event)">
 
-        <!-- Número de mesa -->
-        <div class="col-md-6">
-          <label class="form-label">Mesa <span class="text-muted">(opcional si hay cliente)</span></label>
-          <input type="number" id="mesa" class="form-control" min="1" placeholder="Ej: 5">
-        </div>
+              <!-- Tipo de pedido: cliente o mesa -->
+              <div class="mb-3">
+                <label for="f-tipo" class="form-label">Tipo de Pedido <span class="text-danger">*</span></label>
+                <select id="f-tipo" class="form-select" onchange="toggleTipoPedido()">
+                  <option value="">-- Seleccione --</option>
+                  <option value="cliente">Para un cliente registrado</option>
+                  <option value="mesa">Para una mesa</option>
+                </select>
+              </div>
 
-        <!-- Mensaje si no se selecciona ni cliente ni mesa -->
-        <div class="col-12">
-          <div class="error-msg" id="err-destino">Debe seleccionar un cliente o ingresar un número de mesa.</div>
-        </div>
+              <!-- Selector de cliente (visible si tipo=cliente) -->
+              <div id="bloque-cliente" class="mb-3" style="display:none;">
+                <label for="f-cliente" class="form-label">Cliente <span class="text-danger">*</span></label>
+                <select id="f-cliente" class="form-select">
+                  <option value="">-- Seleccione un cliente --</option>
+                  <!-- Llenado por JS -->
+                </select>
+              </div>
 
-        <!-- Selección de productos -->
-        <div class="col-12">
-          <label class="form-label">Agregar Producto <span class="text-danger">*</span></label>
-          <div class="input-group">
-            <select id="selectorProducto" class="form-select">
-              <option value="">-- Seleccione un producto --</option>
-            </select>
-            <button class="btn btn-brew-secondary" type="button" onclick="agregarProducto()">+ Agregar</button>
+              <!-- Número de mesa (visible si tipo=mesa) -->
+              <div id="bloque-mesa" class="mb-3" style="display:none;">
+                <label for="f-mesa" class="form-label">Número de Mesa <span class="text-danger">*</span></label>
+                <input type="number" id="f-mesa" class="form-control" placeholder="Ej: 5" min="1" />
+              </div>
+
+              <hr />
+
+              <!-- Selector de productos a agregar -->
+              <h5 class="mb-3" style="color: var(--cafe-oscuro);">
+                <i class="bi bi-bag-plus me-2"></i>Agregar Productos
+              </h5>
+              <div class="row g-2 mb-3 align-items-end">
+                <div class="col-12 col-sm-6">
+                  <label for="f-producto" class="form-label">Producto</label>
+                  <select id="f-producto" class="form-select">
+                    <option value="">-- Seleccione un producto --</option>
+                    <!-- Llenado por JS -->
+                  </select>
+                </div>
+                <div class="col-6 col-sm-3">
+                  <label for="f-cantidad" class="form-label">Cantidad</label>
+                  <input type="number" id="f-cantidad" class="form-control" value="1" min="1" max="99" />
+                </div>
+                <div class="col-6 col-sm-3">
+                  <button type="button" class="btn btn-brew-secondary w-100" onclick="agregarProductoAPedido()">
+                    <i class="bi bi-plus-lg me-1"></i>Agregar
+                  </button>
+                </div>
+              </div>
+
+              <!-- Lista de productos en el pedido -->
+              <div id="lista-productos-pedido" class="mb-3">
+                <p class="text-muted small">No ha agregado productos.</p>
+              </div>
+
+              <!-- Total calculado -->
+              <div class="total-pedido-box mb-4">
+                Total: <span id="total-pedido">$0.00</span>
+              </div>
+
+              <!-- Botones -->
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-brew-primary px-4">
+                  <i class="bi bi-check-circle me-1"></i>Confirmar Pedido
+                </button>
+                <a href="pedidos.html" class="btn btn-outline-secondary px-4">
+                  <i class="bi bi-x-circle me-1"></i>Cancelar
+                </a>
+              </div>
+
+            </form>
           </div>
-          <div class="error-msg" id="err-productos">Debe agregar al menos un producto.</div>
-        </div>
-
-        <!-- Lista de productos del pedido -->
-        <div class="col-12" id="listaProductosPedido">
-          <!-- Los productos agregados aparecen aquí -->
-        </div>
-
-        <!-- Total calculado -->
-        <div class="col-12">
-          <div class="total-pedido-box">
-            Total: $<span id="totalPedido">0.00</span>
-          </div>
-        </div>
-
-        <!-- Botones -->
-        <div class="col-12 d-flex gap-2 mt-2">
-          <button class="btn btn-brew-primary px-4" onclick="confirmarPedido()">✅ Confirmar Pedido</button>
-          <a href="pedidos.html" class="btn btn-outline-secondary px-4">Cancelar</a>
         </div>
 
       </div>
     </div>
-  </div>
+  </main>
 
   <footer>
-    <p class="mb-0">© 2026 BrewManager — Sistema de Gestión Bar-Café</p>
+    <p class="mb-0">&copy; 2024 BrewManager</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../js/datos.js"></script>
   <script src="../js/pedidos.js"></script>
   <script>
-    // Array que guarda los productos del pedido actual
-    var productosPedido = [];
+    // ===== MOSTRAR/OCULTAR CAMPOS SEGÚN TIPO =====
+    function toggleTipoPedido() {
+      var tipo = document.getElementById("f-tipo").value;
+      document.getElementById("bloque-cliente").style.display = tipo === "cliente" ? "block" : "none";
+      document.getElementById("bloque-mesa").style.display = tipo === "mesa" ? "block" : "none";
+    }
 
-    // Llenar el select de clientes con datos simulados
-    var selectCliente = document.getElementById('clientePedido');
+    // ===== LLENAR SELECT DE CLIENTES =====
+    var selectCliente = document.getElementById("f-cliente");
     clientes.forEach(function(c) {
-      if (c.estado === 'activo') {
-        var opt = document.createElement('option');
+      if (c.estado === "activo") {
+        var opt = document.createElement("option");
         opt.value = c.id;
-        opt.textContent = c.nombres + ' ' + c.apellidos;
+        opt.textContent = c.nombres + " " + c.apellidos;
         selectCliente.appendChild(opt);
       }
     });
 
-    // Llenar el select de productos disponibles
-    var selectProd = document.getElementById('selectorProducto');
+    // ===== LLENAR SELECT DE PRODUCTOS DISPONIBLES =====
+    var selectProd = document.getElementById("f-producto");
     productos.forEach(function(p) {
       if (p.disponible) {
-        var opt = document.createElement('option');
+        var opt = document.createElement("option");
         opt.value = p.id;
-        opt.textContent = p.nombre + ' — $' + p.precio.toFixed(2);
+        opt.textContent = p.nombre + " — $" + p.precio.toFixed(2);
         selectProd.appendChild(opt);
       }
     });
-
-    // Agrega un producto a la lista del pedido
-    function agregarProducto() {
-      var idProd = document.getElementById('selectorProducto').value;
-      if (!idProd) return;
-
-      var prod = productos.find(function(p) { return p.id == idProd; });
-      if (!prod) return;
-
-      // Verificar si ya está en el pedido y aumentar cantidad
-      var existente = productosPedido.find(function(p) { return p.id == idProd; });
-      if (existente) {
-        existente.cantidad++;
-      } else {
-        productosPedido.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
-      }
-
-      renderListaProductos();
-    }
-
-    // Quita un producto de la lista
-    function quitarProducto(id) {
-      productosPedido = productosPedido.filter(function(p) { return p.id != id; });
-      renderListaProductos();
-    }
-
-    // Renderiza la lista de productos del pedido y calcula el total
-    function renderListaProductos() {
-      var lista = document.getElementById('listaProductosPedido');
-      var total = 0;
-
-      if (productosPedido.length === 0) {
-        lista.innerHTML = '<p class="text-muted">No ha agregado productos aún.</p>';
-      } else {
-        lista.innerHTML = productosPedido.map(function(p) {
-          var subtotal = p.precio * p.cantidad;
-          total += subtotal;
-          return `<div class="producto-item d-flex justify-content-between align-items-center">
-            <span>${p.nombre} x${p.cantidad}</span>
-            <span>$${subtotal.toFixed(2)}</span>
-            <button class="btn btn-sm btn-outline-danger" onclick="quitarProducto(${p.id})">✕</button>
-          </div>`;
-        }).join('');
-      }
-
-      document.getElementById('totalPedido').textContent = total.toFixed(2);
-    }
-
-    // Valida y confirma el pedido
-    function confirmarPedido() {
-      // Limpiar errores
-      document.getElementById('err-destino').classList.remove('visible');
-      document.getElementById('err-productos').classList.remove('visible');
-
-      var valido = true;
-      var cliente = document.getElementById('clientePedido').value;
-      var mesa = document.getElementById('mesa').value.trim();
-
-      // Debe haber cliente o mesa
-      if (!cliente && !mesa) {
-        document.getElementById('err-destino').classList.add('visible');
-        valido = false;
-      }
-
-      // Debe haber al menos un producto
-      if (productosPedido.length === 0) {
-        document.getElementById('err-productos').classList.add('visible');
-        valido = false;
-      }
-
-      if (!valido) return;
-
-      alert('✅ Pedido registrado correctamente.');
-      window.location.href = 'pedidos.html';
-    }
-
-    // Inicializar lista vacía
-    renderListaProductos();
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
