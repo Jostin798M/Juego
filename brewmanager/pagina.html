@@ -4,239 +4,295 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BrewManager — Dashboard</title>
-  <!-- Bootstrap 5 CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-  <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/estilos.css" />
+  <style>
+    .dash-hero {
+      background: linear-gradient(135deg, var(--cafe-oscuro) 0%, var(--cafe-medio) 100%);
+      color: var(--cafe-crema);
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .dash-hero h2 { font-size: 1.8rem; font-weight: 700; margin: 0; }
+    .dash-hero p  { margin: .25rem 0 0; opacity: .8; font-size: .95rem; }
+
+    .stat-card {
+      border: none;
+      border-radius: 14px;
+      padding: 1.5rem;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(75,54,33,.13);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(75,54,33,.22); }
+    .stat-card .stat-icon {
+      position: absolute;
+      right: 1.2rem; top: 1rem;
+      font-size: 3.2rem;
+      opacity: .18;
+    }
+    .stat-card .stat-label { font-size: .82rem; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; opacity: .75; }
+    .stat-card .stat-value { font-size: 2.4rem; font-weight: 800; line-height: 1.1; margin: .3rem 0 .5rem; }
+    .stat-card .stat-sub   { font-size: .8rem; opacity: .7; }
+
+    .sc-ventas   { background: linear-gradient(135deg,#4b3621,#7a5c3e); color:#f5f5dc; }
+    .sc-pedidos  { background: linear-gradient(135deg,#a67b5b,#c49a6c); color:#fff; }
+    .sc-clientes { background: linear-gradient(135deg,#6b4c2a,#a67b5b); color:#f5f5dc; }
+    .sc-productos{ background: linear-gradient(135deg,#f5f5dc,#e8e4d0); color:#4b3621; }
+
+    .acceso-card {
+      border: none;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(75,54,33,.10);
+      padding: 1.5rem 1rem;
+      text-align: center;
+      text-decoration: none;
+      color: var(--cafe-oscuro);
+      display: block;
+      transition: transform .18s, box-shadow .18s;
+    }
+    .acceso-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(75,54,33,.18);
+      color: var(--cafe-oscuro);
+    }
+    .acceso-card .ac-icon {
+      font-size: 2.4rem;
+      margin-bottom: .6rem;
+      display: block;
+    }
+    .acceso-card .ac-label { font-weight: 700; font-size: .95rem; }
+    .acceso-card .ac-sub   { font-size: .78rem; color: #888; margin-top: .15rem; }
+
+    .ac-admin  .ac-icon { color: var(--cafe-oscuro); }
+    .ac-mesero .ac-icon { color: var(--cafe-claro); }
+    .ac-cliente .ac-icon { color: #22c55e; }
+
+    .pedidos-recientes-card {
+      border: none;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(75,54,33,.10);
+      overflow: hidden;
+    }
+    .pedidos-recientes-card .card-header {
+      background: var(--cafe-oscuro);
+      color: var(--cafe-crema);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: .9rem 1.2rem;
+      border: none;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ===== NAVBAR ===== -->
+  <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-brew">
     <div class="container">
-      <!-- Logo / Marca -->
       <a class="navbar-brand" href="pagina.html">
         <i class="bi bi-cup-hot-fill me-2"></i>BrewManager
       </a>
-      <!-- Botón hamburguesa para móvil -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <!-- Menú de navegación -->
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="pagina.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="pages/clientes.html"><i class="bi bi-people me-1"></i>Clientes</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="pages/productos.html"><i class="bi bi-bag me-1"></i>Productos</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="pages/pedidos.html"><i class="bi bi-receipt me-1"></i>Pedidos</a>
-          </li>
-          <li class="nav-item ms-lg-3">
-            <a class="nav-link" href="index.html"><i class="bi bi-box-arrow-right me-1"></i>Salir</a>
-          </li>
+          <li class="nav-item"><a class="nav-link active" href="pagina.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="pages/clientes.html"><i class="bi bi-people me-1"></i>Clientes</a></li>
+          <li class="nav-item"><a class="nav-link" href="pages/productos.html"><i class="bi bi-bag me-1"></i>Productos</a></li>
+          <li class="nav-item"><a class="nav-link" href="pages/pedidos.html"><i class="bi bi-receipt me-1"></i>Pedidos</a></li>
+          <li class="nav-item ms-lg-3"><a class="nav-link" href="index.html"><i class="bi bi-box-arrow-right me-1"></i>Salir</a></li>
         </ul>
       </div>
     </div>
   </nav>
-  <!-- /NAVBAR -->
 
-  <!-- ===== CONTENIDO PRINCIPAL ===== -->
-  <main class="container py-5">
+  <main class="container py-4">
 
-    <!-- Título de sección -->
-    <h2 class="section-title">
-      <i class="bi bi-speedometer2 me-2"></i>Dashboard
-    </h2>
-    <p class="text-muted mb-4">Resumen general del sistema — hoy <span id="fecha-hoy"></span></p>
-
-    <!-- ===== TARJETAS DE ESTADÍSTICAS ===== -->
-    <div class="row g-4 mb-5">
-
-      <!-- Tarjeta 1: Total ventas hoy -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-brew card-brew-primary p-4 h-100">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <p class="mb-1 fw-semibold opacity-75">Total Ventas Hoy</p>
-              <div class="card-number" id="stat-ventas">$0.00</div>
-            </div>
-            <span class="card-icon"><i class="bi bi-cash-stack"></i></span>
-          </div>
-          <p class="mt-3 mb-0 small opacity-75">Ingresos del día</p>
-        </div>
+    <!-- Hero -->
+    <div class="dash-hero">
+      <div>
+        <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+        <p>Bienvenido, Administrador &mdash; <span id="fecha-hoy"></span></p>
       </div>
-
-      <!-- Tarjeta 2: Pedidos activos -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-brew card-brew-secondary p-4 h-100">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <p class="mb-1 fw-semibold opacity-75">Pedidos Activos</p>
-              <div class="card-number" id="stat-pedidos">0</div>
-            </div>
-            <span class="card-icon"><i class="bi bi-receipt-cutoff"></i></span>
-          </div>
-          <p class="mt-3 mb-0 small opacity-75">Pendientes + En preparación</p>
-        </div>
-      </div>
-
-      <!-- Tarjeta 3: Clientes activos -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-brew card-brew-accent p-4 h-100">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <p class="mb-1 fw-semibold opacity-75">Clientes Activos</p>
-              <div class="card-number" id="stat-clientes">0</div>
-            </div>
-            <span class="card-icon"><i class="bi bi-person-check"></i></span>
-          </div>
-          <p class="mt-3 mb-0 small opacity-75">Registrados y activos</p>
-        </div>
-      </div>
-
-      <!-- Tarjeta 4: Productos disponibles -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-brew card-brew-light p-4 h-100">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <p class="mb-1 fw-semibold opacity-75">Productos Disponibles</p>
-              <div class="card-number" id="stat-productos">0</div>
-            </div>
-            <span class="card-icon"><i class="bi bi-bag-check"></i></span>
-          </div>
-          <p class="mt-3 mb-0 small opacity-75">En carta actualmente</p>
-        </div>
-      </div>
-
+      <a href="pages/pedido-form.html" class="btn btn-light fw-semibold px-4 py-2" style="color:var(--cafe-oscuro);">
+        <i class="bi bi-plus-circle me-2"></i>Nuevo Pedido
+      </a>
     </div>
-    <!-- /TARJETAS -->
 
-    <!-- ===== ACCESOS RÁPIDOS ===== -->
-    <h4 class="section-title mt-4">Administración</h4>
+    <!-- Estadísticas -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-xl-3">
+        <div class="stat-card sc-ventas">
+          <i class="bi bi-cash-stack stat-icon"></i>
+          <div class="stat-label">Ventas hoy</div>
+          <div class="stat-value" id="stat-ventas">$0.00</div>
+          <div class="stat-sub">Pedidos entregados</div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card sc-pedidos">
+          <i class="bi bi-receipt-cutoff stat-icon"></i>
+          <div class="stat-label">Pedidos activos</div>
+          <div class="stat-value" id="stat-pedidos">0</div>
+          <div class="stat-sub">Pendientes + en preparación</div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card sc-clientes">
+          <i class="bi bi-person-check stat-icon"></i>
+          <div class="stat-label">Clientes activos</div>
+          <div class="stat-value" id="stat-clientes">0</div>
+          <div class="stat-sub">Registrados y activos</div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card sc-productos">
+          <i class="bi bi-bag-check stat-icon"></i>
+          <div class="stat-label">Productos</div>
+          <div class="stat-value" id="stat-productos">0</div>
+          <div class="stat-sub">En carta actualmente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <h5 class="section-title">Administración</h5>
     <div class="row g-3 mb-4">
       <div class="col-6 col-md-3">
-        <a href="pages/clientes.html" class="btn btn-brew-primary w-100 py-3">
-          <i class="bi bi-people-fill d-block fs-3 mb-1"></i>Clientes
+        <a href="pages/clientes.html" class="acceso-card ac-admin">
+          <i class="bi bi-people-fill ac-icon"></i>
+          <div class="ac-label">Clientes</div>
+          <div class="ac-sub">Gestionar registros</div>
         </a>
       </div>
       <div class="col-6 col-md-3">
-        <a href="pages/productos.html" class="btn btn-brew-primary w-100 py-3">
-          <i class="bi bi-bag-fill d-block fs-3 mb-1"></i>Productos
+        <a href="pages/productos.html" class="acceso-card ac-admin">
+          <i class="bi bi-bag-fill ac-icon"></i>
+          <div class="ac-label">Productos</div>
+          <div class="ac-sub">Carta y disponibilidad</div>
         </a>
       </div>
       <div class="col-6 col-md-3">
-        <a href="pages/pedidos.html" class="btn btn-brew-primary w-100 py-3">
-          <i class="bi bi-receipt d-block fs-3 mb-1"></i>Pedidos
+        <a href="pages/pedidos.html" class="acceso-card ac-admin">
+          <i class="bi bi-receipt ac-icon"></i>
+          <div class="ac-label">Pedidos</div>
+          <div class="ac-sub">Ver todos los pedidos</div>
         </a>
       </div>
       <div class="col-6 col-md-3">
-        <a href="pages/pedido-form.html" class="btn btn-brew-secondary w-100 py-3">
-          <i class="bi bi-plus-circle-fill d-block fs-3 mb-1"></i>Nuevo Pedido
+        <a href="pages/pedido-form.html" class="acceso-card ac-admin">
+          <i class="bi bi-plus-circle-fill ac-icon"></i>
+          <div class="ac-label">Nuevo Pedido</div>
+          <div class="ac-sub">Crear desde cero</div>
         </a>
       </div>
     </div>
 
-    <h4 class="section-title mt-2">Módulos de Servicio</h4>
-    <div class="row g-3">
+    <h5 class="section-title">Módulos de Servicio</h5>
+    <div class="row g-3 mb-5">
       <div class="col-6 col-md-4">
-        <a href="pages/mesero-mesas.html" class="btn btn-brew-secondary w-100 py-3">
-          <i class="bi bi-grid-fill d-block fs-3 mb-1"></i>Módulo Mesero
+        <a href="pages/mesero-mesas.html" class="acceso-card ac-mesero">
+          <i class="bi bi-grid-fill ac-icon"></i>
+          <div class="ac-label">Módulo Mesero</div>
+          <div class="ac-sub">Mesas y pedidos activos</div>
         </a>
       </div>
       <div class="col-6 col-md-4">
-        <a href="pages/cliente-carta.html" class="btn btn-outline-secondary w-100 py-3" style="border-color:var(--cafe-claro);color:var(--cafe-oscuro);">
-          <i class="bi bi-book d-block fs-3 mb-1"></i>Módulo Cliente
+        <a href="pages/cliente-carta.html" class="acceso-card ac-cliente">
+          <i class="bi bi-book ac-icon"></i>
+          <div class="ac-label">Módulo Cliente</div>
+          <div class="ac-sub">Carta interactiva</div>
         </a>
       </div>
     </div>
 
-    <!-- ===== RESUMEN DE PEDIDOS RECIENTES ===== -->
-    <h4 class="section-title mt-5">Pedidos Recientes</h4>
-    <div class="table-responsive">
-      <table class="table table-brew table-bordered table-hover">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Cliente / Mesa</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-recientes">
-          <!-- Llenado por JS -->
-        </tbody>
-      </table>
+    <!-- Pedidos recientes -->
+    <div class="pedidos-recientes-card card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history me-2"></i>Pedidos Recientes</span>
+        <a href="pages/pedidos.html" class="btn btn-sm btn-light" style="color:var(--cafe-oscuro);font-size:.8rem;">Ver todos</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-brew table-hover mb-0">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente / Mesa</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-recientes"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
   </main>
-  <!-- /CONTENIDO -->
 
-  <!-- ===== FOOTER ===== -->
   <footer>
     <p class="mb-0">&copy; 2024 BrewManager — Sistema de Gestión de Bar-Café</p>
   </footer>
 
-  <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Datos simulados -->
   <script src="js/datos.js"></script>
-  <!-- Script del dashboard -->
   <script>
-    // ===== MOSTRAR FECHA DE HOY =====
-    var hoy = new Date();
-    document.getElementById("fecha-hoy").textContent = hoy.toLocaleDateString("es-EC", {
+    document.getElementById("fecha-hoy").textContent = new Date().toLocaleDateString("es-EC", {
       weekday: "long", year: "numeric", month: "long", day: "numeric"
     });
 
-    // ===== CALCULAR ESTADÍSTICAS =====
-    // Total de ventas (pedidos entregados)
     var totalVentas = pedidos
       .filter(function(p) { return p.estado === "entregado"; })
       .reduce(function(acc, p) { return acc + p.total; }, 0);
     document.getElementById("stat-ventas").textContent = "$" + totalVentas.toFixed(2);
 
-    // Pedidos activos (pendiente + en preparación)
-    var pedidosActivos = pedidos.filter(function(p) {
+    document.getElementById("stat-pedidos").textContent = pedidos.filter(function(p) {
       return p.estado === "pendiente" || p.estado === "en preparación";
     }).length;
-    document.getElementById("stat-pedidos").textContent = pedidosActivos;
 
-    // Clientes activos
-    var clientesActivos = clientes.filter(function(c) { return c.estado === "activo"; }).length;
-    document.getElementById("stat-clientes").textContent = clientesActivos;
+    document.getElementById("stat-clientes").textContent =
+      clientes.filter(function(c) { return c.estado === "activo"; }).length;
 
-    // Productos disponibles
-    var productosDisponibles = productos.filter(function(p) { return p.disponible; }).length;
-    document.getElementById("stat-productos").textContent = productosDisponibles;
+    document.getElementById("stat-productos").textContent =
+      productos.filter(function(p) { return p.disponible; }).length;
 
-    // ===== TABLA DE PEDIDOS RECIENTES =====
+    var badgesMap = {
+      "pendiente": "badge-pendiente",
+      "en preparación": "badge-preparacion",
+      "entregado": "badge-entregado",
+      "cancelado": "badge-cancelado"
+    };
     var tbody = document.getElementById("tbody-recientes");
-    pedidos.slice(0, 4).forEach(function(p) {
-      var origen = p.cliente ? p.cliente : "Mesa " + p.mesa;
-      var badgesMap = {
-        "pendiente": "badge-pendiente",
-        "en preparación": "badge-preparacion",
-        "entregado": "badge-entregado",
-        "cancelado": "badge-cancelado"
-      };
-      var badgeClase = badgesMap[p.estado] || "badge-pendiente";
-      tbody.innerHTML += '<tr>' +
-        '<td>#' + p.id + '</td>' +
-        '<td>' + origen + '</td>' +
-        '<td>$' + p.total.toFixed(2) + '</td>' +
-        '<td><span class="badge ' + badgeClase + '">' + p.estado + '</span></td>' +
-        '<td>' + p.fecha + '</td>' +
-      '</tr>';
-    });
+    var recientes = pedidos.slice().reverse().slice(0, 5);
+    if (recientes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Sin pedidos registrados.</td></tr>';
+    } else {
+      recientes.forEach(function(p) {
+        var origen = p.cliente ? p.cliente : "Mesa " + p.mesa;
+        var cls = badgesMap[p.estado] || "badge-pendiente";
+        tbody.innerHTML +=
+          '<tr>' +
+            '<td><strong>#' + p.id + '</strong></td>' +
+            '<td>' + origen + '</td>' +
+            '<td><strong>$' + p.total.toFixed(2) + '</strong></td>' +
+            '<td><span class="badge ' + cls + '">' + p.estado + '</span></td>' +
+            '<td>' + p.fecha + '</td>' +
+          '</tr>';
+      });
+    }
   </script>
 
 </body>
