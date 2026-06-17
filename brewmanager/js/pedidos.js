@@ -1,56 +1,9 @@
-/**
- * pedidos.js — Módulo de gestión de pedidos
- * Funciones: renderTabla, cambiarEstado, calcularTotal
- * Depende de: datos.js (arrays globales `pedidos`, `clientes`, `productos`)
- */
+var _pedidosCache = [];
+var _clientesSelect = [];
+var _productosSelect = [];
+var productosEnPedido = [];
 
-// ===== RENDER TABLA DE PEDIDOS =====
-/**
- * Renderiza la tabla de pedidos en el DOM.
- * @param {Array} lista - Array de pedidos a mostrar (por defecto todos)
- */
-function renderTablaPedidos(lista) {
-  var datos = lista || pedidos;
-  var tbody = document.getElementById("tbody-pedidos");
-
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  if (datos.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No hay pedidos registrados.</td></tr>';
-    return;
-  }
-
-  datos.forEach(function(p) {
-    // Determinar quién hizo el pedido (cliente o mesa)
-    var origen = p.cliente ? p.cliente : "Mesa " + p.mesa;
-
-    // Clase del badge según estado
-    var badgeClase = obtenerBadgeEstadoPedido(p.estado);
-
-    var fila = '<tr>' +
-      '<td>#' + p.id + '</td>' +
-      '<td>' + origen + '</td>' +
-      '<td>$' + p.total.toFixed(2) + '</td>' +
-      '<td><span class="badge ' + badgeClase + '">' + p.estado + '</span></td>' +
-      '<td>' + p.fecha + '</td>' +
-      '<td>' +
-        '<a href="pedido-detalle.html?id=' + p.id + '" class="btn btn-sm btn-info me-1">Ver</a>' +
-        '<button class="btn btn-sm btn-brew-secondary" onclick="cambiarEstadoPedido(' + p.id + ')">Cambiar Estado</button>' +
-      '</td>' +
-    '</tr>';
-
-    tbody.innerHTML += fila;
-  });
-}
-
-// ===== OBTENER CLASE BADGE SEGÚN ESTADO =====
-/**
- * Retorna la clase CSS del badge según el estado del pedido.
- * @param {string} estado
- * @returns {string} clase CSS
- */
+// ===== BADGE ESTADO =====
 function obtenerBadgeEstadoPedido(estado) {
   var mapa = {
     "pendiente": "badge-pendiente",
@@ -61,250 +14,245 @@ function obtenerBadgeEstadoPedido(estado) {
   return mapa[estado] || "badge-pendiente";
 }
 
-// ===== CAMBIAR ESTADO DE PEDIDO =====
-/**
- * Cambia el estado de un pedido por su id.
- * Ciclo de estados: pendiente → en preparación → entregado
- * También permite cancelar.
- * @param {number} id - ID del pedido
- */
-function cambiarEstadoPedido(id) {
-  var pedido = pedidos.find(function(p) { return p.id === id; });
+// ===== RENDER TABLA =====
+function renderTablaPedidos(lista) {
+  var datos = lista || _pedidosCache;
+  var tbody = document.getElementById("tbody-pedidos");
+  if (!tbody) return;
 
-  if (!pedido) {
-    alert("Pedido no encontrado.");
+  tbody.innerHTML = "";
+
+  if (datos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No hay pedidos registrados.</td></tr>';
     return;
   }
 
-  // Definir estados posibles y el siguiente
-  var flujo = ["pendiente", "en preparación", "entregado"];
-  var indexActual = flujo.indexOf(pedido.estado);
-  var siguienteEstado = indexActual < flujo.length - 1 ? flujo[indexActual + 1] : pedido.estado;
+  datos.forEach(function(p) {
+    var origen = p.cliente_nombre || (p.mesa ? "Mesa " + p.mesa : "—");
+    var badgeClase = obtenerBadgeEstadoPedido(p.estado);
 
-  // Si ya está entregado o cancelado, no cambiar
+    tbody.innerHTML += '<tr>' +
+      '<td>#' + p.id + '</td>' +
+      '<td>' + origen + '</td>' +
+      '<td>$' + parseFloat(p.total).toFixed(2) + '</td>' +
+      '<td><span class="badge ' + badgeClase + '">' + p.estado + '</span></td>' +
+      '<td>' + (p.fecha ? p.fecha.slice(0, 10) : "—") + '</td>' +
+      '<td>' +
+        '<a href="pedido-detalle.html?id=' + p.id + '" class="btn btn-sm btn-info me-1">Ver</a>' +
+        '<button class="btn btn-sm btn-brew-secondary" onclick="cambiarEstadoPedido(' + p.id + ')">Cambiar Estado</button>' +
+      '</td>' +
+    '</tr>';
+  });
+}
+
+// ===== CARGAR TABLA DESDE API =====
+function cargarTablaPedidos() {
+  apiGet("/pedidos/").then(function(data) {
+    _pedidosCache = data;
+    renderTablaPedidos();
+  }).catch(function() {
+    var tbody = document.getElementById("tbody-pedidos");
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-3">Error al conectar con el servidor.</td></tr>';
+  });
+}
+
+// ===== CAMBIAR ESTADO DESDE TABLA =====
+function cambiarEstadoPedido(id) {
+  var pedido = _pedidosCache.find(function(p) { return p.id === id; });
+  if (!pedido) return;
+
   if (pedido.estado === "entregado" || pedido.estado === "cancelado") {
     alert('El pedido ya está en estado "' + pedido.estado + '" y no puede modificarse.');
     return;
   }
 
-  var opcion = prompt(
-    'Estado actual: "' + pedido.estado + '"\n' +
-    'Ingrese el nuevo estado:\n' +
-    '1 - ' + (siguienteEstado) + '\n' +
-    '2 - cancelado\n\n' +
-    'Escriba 1 o 2:'
-  );
+  var flujo = ["pendiente", "en preparación", "entregado"];
+  var idx = flujo.indexOf(pedido.estado);
+  var siguiente = idx < flujo.length - 1 ? flujo[idx + 1] : pedido.estado;
 
-  if (opcion === "1") {
-    pedido.estado = siguienteEstado;
-    alert('Estado cambiado a "' + siguienteEstado + '".');
+  var opcion = prompt(
+    'Estado actual: "' + pedido.estado + '"\nNuevo estado:\n1 - ' + siguiente + '\n2 - cancelado\n\nEscriba 1 o 2:'
+  );
+  if (!opcion) return;
+
+  var nuevoEstado = opcion === "1" ? siguiente : opcion === "2" ? "cancelado" : null;
+  if (!nuevoEstado) return;
+
+  apiPatch("/pedidos/" + id + "/cambiar-estado/", { estado: nuevoEstado }).then(function(resp) {
+    pedido.estado = resp.estado;
     renderTablaPedidos();
-  } else if (opcion === "2") {
-    pedido.estado = "cancelado";
-    alert('Pedido cancelado.');
-    renderTablaPedidos();
-  }
-  // Si cancela el prompt, no hacer nada
+  }).catch(function(e) { alert("Error: " + JSON.stringify(e)); });
 }
 
-// ===== CALCULAR TOTAL DEL PEDIDO =====
-/**
- * Calcula el total de un pedido sumando precio * cantidad de cada producto.
- * Actualiza el elemento con id "total-pedido" en el DOM.
- * @param {Array} productosSeleccionados - Array de {precio, cantidad}
- * @returns {number} total calculado
- */
-function calcularTotal(productosSeleccionados) {
-  var total = 0;
-  productosSeleccionados.forEach(function(item) {
-    total += item.precio * item.cantidad;
+// ===== CARGAR DETALLE =====
+function cargarDetallePedido() {
+  var id = new URLSearchParams(window.location.search).get("id");
+  if (!id) return;
+
+  apiGet("/pedidos/" + id + "/").then(function(p) {
+    var set = function(elId, val) { var el = document.getElementById(elId); if (el) el.textContent = val; };
+    var origen = p.cliente_nombre || (p.mesa ? "Mesa " + p.mesa : "—");
+    set("det-origen", origen);
+    set("det-fecha", p.fecha ? p.fecha.slice(0, 10) : "—");
+    set("det-total", "$" + parseFloat(p.total).toFixed(2));
+
+    var badgeEl = document.getElementById("det-estado");
+    if (badgeEl) {
+      badgeEl.className = "badge " + obtenerBadgeEstadoPedido(p.estado) + " fs-6";
+      badgeEl.textContent = p.estado;
+    }
+
+    var listaEl = document.getElementById("det-productos");
+    if (listaEl) {
+      listaEl.innerHTML = "";
+      (p.detalles || []).forEach(function(d) {
+        listaEl.innerHTML +=
+          '<li class="list-group-item d-flex justify-content-between align-items-center">' +
+            '<span>' + d.producto_nombre + ' <span class="text-muted">x' + d.cantidad + '</span></span>' +
+            '<span class="fw-bold">$' + parseFloat(d.subtotal).toFixed(2) + '</span>' +
+          '</li>';
+      });
+    }
+
+    var btnEstado = document.getElementById("btn-estado-pedido");
+    if (btnEstado) {
+      if (p.estado === "entregado" || p.estado === "cancelado") {
+        btnEstado.disabled = true;
+        btnEstado.textContent = "Sin cambios disponibles";
+      } else {
+        btnEstado.onclick = function() {
+          var flujo = ["pendiente", "en preparación", "entregado"];
+          var idx = flujo.indexOf(p.estado);
+          var siguiente = idx < flujo.length - 1 ? flujo[idx + 1] : p.estado;
+          var opcion = prompt('Estado actual: "' + p.estado + '"\n1 - ' + siguiente + '\n2 - cancelado\n\nEscriba 1 o 2:');
+          if (!opcion) return;
+          var nuevoEstado = opcion === "1" ? siguiente : opcion === "2" ? "cancelado" : null;
+          if (!nuevoEstado) return;
+          apiPatch("/pedidos/" + p.id + "/cambiar-estado/", { estado: nuevoEstado }).then(function() {
+            cargarDetallePedido();
+          });
+        };
+      }
+    }
+  }).catch(function() {
+    var cont = document.getElementById("contenido-pedido");
+    if (cont) cont.innerHTML = '<div class="alert alert-danger">Pedido no encontrado o error de conexión.</div>';
   });
+}
 
-  // Actualizar en el DOM si existe el elemento
-  var totalEl = document.getElementById("total-pedido");
-  if (totalEl) totalEl.textContent = "$" + total.toFixed(2);
-
+// ===== FORMULARIO DE PEDIDO =====
+function calcularTotal(lista) {
+  var total = lista.reduce(function(acc, i) { return acc + i.precio * i.cantidad; }, 0);
+  var el = document.getElementById("total-pedido");
+  if (el) el.textContent = "$" + total.toFixed(2);
   return total;
 }
 
-// ===== CARGAR DETALLE DE PEDIDO =====
-/**
- * Carga el detalle de un pedido en la vista cliente-detalle según ?id= en la URL.
- */
-function cargarDetallePedido() {
-  var params = new URLSearchParams(window.location.search);
-  var id = parseInt(params.get("id"));
-
-  var pedido = pedidos.find(function(p) { return p.id === id; });
-
-  if (!pedido) {
-    document.getElementById("contenido-pedido").innerHTML =
-      '<div class="alert alert-danger">Pedido no encontrado.</div>';
-    return;
-  }
-
-  // Llenar datos generales
-  var setTexto = function(elId, valor) {
-    var el = document.getElementById(elId);
-    if (el) el.textContent = valor;
-  };
-
-  var origen = pedido.cliente ? pedido.cliente : "Mesa " + pedido.mesa;
-  setTexto("det-origen", origen);
-  setTexto("det-fecha", pedido.fecha);
-  setTexto("det-total", "$" + pedido.total.toFixed(2));
-
-  // Badge de estado
-  var badgeEl = document.getElementById("det-estado");
-  if (badgeEl) {
-    badgeEl.className = "badge " + obtenerBadgeEstadoPedido(pedido.estado) + " fs-6";
-    badgeEl.textContent = pedido.estado;
-  }
-
-  // Lista de productos
-  var listaEl = document.getElementById("det-productos");
-  if (listaEl) {
-    listaEl.innerHTML = "";
-    pedido.productos.forEach(function(prod) {
-      var subtotal = prod.precio * prod.cantidad;
-      listaEl.innerHTML +=
-        '<li class="list-group-item d-flex justify-content-between align-items-center">' +
-          '<span>' + prod.nombre + ' <span class="text-muted">x' + prod.cantidad + '</span></span>' +
-          '<span class="fw-bold">$' + subtotal.toFixed(2) + '</span>' +
-        '</li>';
-    });
-  }
-
-  // Botón cambiar estado
-  var btnEstado = document.getElementById("btn-estado-pedido");
-  if (btnEstado) {
-    if (pedido.estado === "entregado" || pedido.estado === "cancelado") {
-      btnEstado.disabled = true;
-      btnEstado.textContent = "Sin cambios disponibles";
-    } else {
-      btnEstado.onclick = function() {
-        cambiarEstadoPedido(pedido.id);
-        cargarDetallePedido();
-      };
-    }
-  }
-}
-
-// ===== MÓDULO FORMULARIO DE PEDIDO =====
-// Array temporal de productos seleccionados en el formulario
-var productosEnPedido = [];
-
-/**
- * Agrega un producto al pedido actual desde el formulario.
- */
-function agregarProductoAPedido() {
-  var selectEl = document.getElementById("f-producto");
-  var cantidadEl = document.getElementById("f-cantidad");
-
-  if (!selectEl || !cantidadEl) return;
-
-  var idProd = parseInt(selectEl.value);
-  var cantidad = parseInt(cantidadEl.value);
-
-  if (!idProd) {
-    alert("Seleccione un producto.");
-    return;
-  }
-  if (!cantidad || cantidad < 1) {
-    alert("Ingrese una cantidad válida.");
-    return;
-  }
-
-  // Buscar el producto en los datos globales
-  var producto = productos.find(function(p) { return p.id === idProd; });
-  if (!producto) return;
-
-  // Si ya está en la lista, aumentar cantidad
-  var existente = productosEnPedido.find(function(p) { return p.id === idProd; });
-  if (existente) {
-    existente.cantidad += cantidad;
-  } else {
-    productosEnPedido.push({
-      id: producto.id,
-      nombre: producto.nombre,
-      precio: producto.precio,
-      cantidad: cantidad
-    });
-  }
-
-  // Re-render lista y total
-  renderListaProductosPedido();
-  calcularTotal(productosEnPedido);
-  cantidadEl.value = 1;
-}
-
-/**
- * Renderiza la lista de productos agregados al pedido en el formulario.
- */
 function renderListaProductosPedido() {
   var listaEl = document.getElementById("lista-productos-pedido");
   if (!listaEl) return;
-
-  listaEl.innerHTML = "";
-
   if (productosEnPedido.length === 0) {
     listaEl.innerHTML = '<p class="text-muted small">No ha agregado productos.</p>';
     return;
   }
-
+  listaEl.innerHTML = "";
   productosEnPedido.forEach(function(item, idx) {
     listaEl.innerHTML +=
       '<div class="producto-item d-flex justify-content-between align-items-center">' +
         '<span>' + item.nombre + ' x' + item.cantidad + '</span>' +
-        '<span>' +
-          '<strong>$' + (item.precio * item.cantidad).toFixed(2) + '</strong> ' +
+        '<span><strong>$' + (item.precio * item.cantidad).toFixed(2) + '</strong> ' +
           '<button class="btn btn-sm btn-danger ms-2" onclick="quitarProducto(' + idx + ')">×</button>' +
         '</span>' +
       '</div>';
   });
 }
 
-/**
- * Quita un producto de la lista del pedido por índice.
- * @param {number} idx - índice en el array productosEnPedido
- */
 function quitarProducto(idx) {
   productosEnPedido.splice(idx, 1);
   renderListaProductosPedido();
   calcularTotal(productosEnPedido);
 }
 
-/**
- * Valida y "guarda" (simula) el pedido.
- */
+function agregarProductoAPedido() {
+  var selectEl = document.getElementById("f-producto");
+  var cantidadEl = document.getElementById("f-cantidad");
+  if (!selectEl || !cantidadEl) return;
+
+  var idProd = parseInt(selectEl.value);
+  var cantidad = parseInt(cantidadEl.value);
+
+  if (!idProd) { alert("Seleccione un producto."); return; }
+  if (!cantidad || cantidad < 1) { alert("Ingrese una cantidad válida."); return; }
+
+  var producto = _productosSelect.find(function(p) { return p.id === idProd; });
+  if (!producto) return;
+
+  var existente = productosEnPedido.find(function(p) { return p.id === idProd; });
+  if (existente) {
+    existente.cantidad += cantidad;
+  } else {
+    productosEnPedido.push({ id: producto.id, nombre: producto.nombre, precio: parseFloat(producto.precio), cantidad: cantidad });
+  }
+
+  renderListaProductosPedido();
+  calcularTotal(productosEnPedido);
+  cantidadEl.value = 1;
+}
+
+// Llena los selects del formulario de pedido desde la API
+function iniciarFormPedido() {
+  apiGet("/clientes/?estado=activo").then(function(data) {
+    _clientesSelect = data;
+    var sel = document.getElementById("f-cliente");
+    if (!sel) return;
+    data.forEach(function(c) {
+      var opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.nombres + " " + c.apellidos;
+      sel.appendChild(opt);
+    });
+  });
+
+  apiGet("/productos/?disponible=true").then(function(data) {
+    _productosSelect = data;
+    var sel = document.getElementById("f-producto");
+    if (!sel) return;
+    data.forEach(function(p) {
+      var opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.nombre + " — $" + parseFloat(p.precio).toFixed(2);
+      sel.appendChild(opt);
+    });
+  });
+}
+
 function guardarPedido(event) {
   event.preventDefault();
 
-  var tipoEl = document.getElementById("f-tipo");
-  var clienteEl = document.getElementById("f-cliente");
-  var mesaEl = document.getElementById("f-mesa");
+  var tipo = document.getElementById("f-tipo") ? document.getElementById("f-tipo").value : "";
+  if (!tipo) { alert("Seleccione si el pedido es para un cliente o una mesa."); return; }
 
-  // Validar que se seleccionó cliente o mesa
-  var tipo = tipoEl ? tipoEl.value : "";
-  if (!tipo) {
-    alert("Seleccione si el pedido es para un cliente o una mesa.");
-    return;
+  var clienteId = null, mesa = null;
+  if (tipo === "cliente") {
+    clienteId = document.getElementById("f-cliente").value;
+    if (!clienteId) { alert("Seleccione un cliente."); return; }
+  } else {
+    mesa = document.getElementById("f-mesa").value.trim();
+    if (!mesa) { alert("Ingrese el número de mesa."); return; }
   }
 
-  if (tipo === "cliente" && clienteEl && !clienteEl.value) {
-    alert("Seleccione un cliente.");
-    return;
-  }
-  if (tipo === "mesa" && mesaEl && !mesaEl.value.trim()) {
-    alert("Ingrese el número de mesa.");
-    return;
-  }
+  if (productosEnPedido.length === 0) { alert("Agregue al menos un producto."); return; }
 
-  if (productosEnPedido.length === 0) {
-    alert("Agregue al menos un producto al pedido.");
-    return;
-  }
+  var datos = {
+    detalles: productosEnPedido.map(function(p) { return { producto: p.id, cantidad: p.cantidad }; })
+  };
+  if (clienteId) datos.cliente = parseInt(clienteId);
+  if (mesa) datos.mesa = parseInt(mesa);
 
-  alert("Pedido registrado correctamente. Total: $" + calcularTotal(productosEnPedido).toFixed(2));
-  window.location.href = "pedidos.html";
+  apiPost("/pedidos/", datos).then(function() {
+    alert("Pedido registrado correctamente.");
+    window.location.href = "pedidos.html";
+  }).catch(function(err) {
+    alert("Error al guardar el pedido: " + JSON.stringify(err));
+  });
 }

@@ -1,18 +1,9 @@
-/**
- * productos.js — Módulo de gestión de productos
- * Funciones: renderTabla, cambiarDisponibilidad
- * Depende de: datos.js (array global `productos`)
- */
+var _productosCache = [];
 
-// ===== RENDER TABLA DE PRODUCTOS =====
-/**
- * Renderiza la tabla de productos en el DOM.
- * @param {Array} lista - Array de productos a mostrar (por defecto todos)
- */
+// ===== RENDER TABLA =====
 function renderTablaProductos(lista) {
-  var datos = lista || productos;
+  var datos = lista || _productosCache;
   var tbody = document.getElementById("tbody-productos");
-
   if (!tbody) return;
 
   tbody.innerHTML = "";
@@ -25,97 +16,82 @@ function renderTablaProductos(lista) {
   datos.forEach(function(p) {
     var badgeClase = p.disponible ? "badge-disponible" : "badge-nodisponible";
     var badgeTexto = p.disponible ? "Disponible" : "No disponible";
+    var precio = parseFloat(p.precio);
 
-    var fila = '<tr>' +
+    tbody.innerHTML += '<tr>' +
       '<td>' + p.id + '</td>' +
       '<td>' + p.nombre + '</td>' +
       '<td>' + p.categoria + '</td>' +
-      '<td>$' + p.precio.toFixed(2) + '</td>' +
+      '<td>$' + precio.toFixed(2) + '</td>' +
       '<td><span class="badge ' + badgeClase + '">' + badgeTexto + '</span></td>' +
       '<td>' +
-        '<a href="producto-form.html?id=' + p.id + '" class="btn btn-sm btn-warning me-1" title="Editar">Editar</a>' +
-        '<button class="btn btn-sm ' + (p.disponible ? "btn-secondary" : "btn-success") + '" onclick="cambiarDisponibilidad(' + p.id + ')" title="Cambiar disponibilidad">' +
+        '<a href="producto-form.html?id=' + p.id + '" class="btn btn-sm btn-warning me-1">Editar</a>' +
+        '<button class="btn btn-sm ' + (p.disponible ? "btn-secondary" : "btn-success") +
+          '" onclick="cambiarDisponibilidad(' + p.id + ')">' +
           (p.disponible ? "Deshabilitar" : "Habilitar") +
         '</button>' +
       '</td>' +
     '</tr>';
+  });
+}
 
-    tbody.innerHTML += fila;
+// ===== CARGAR TABLA DESDE API =====
+function cargarTablaProductos() {
+  apiGet("/productos/").then(function(data) {
+    _productosCache = data;
+    renderTablaProductos();
+  }).catch(function() {
+    var tbody = document.getElementById("tbody-productos");
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-3">Error al conectar con el servidor.</td></tr>';
   });
 }
 
 // ===== CAMBIAR DISPONIBILIDAD =====
-/**
- * Cambia la disponibilidad de un producto por su id.
- * @param {number} id - ID del producto
- */
 function cambiarDisponibilidad(id) {
-  var producto = productos.find(function(p) { return p.id === id; });
-
-  if (!producto) {
-    alert("Producto no encontrado.");
-    return;
-  }
-
-  var nuevoEstado = !producto.disponible;
-  var textoEstado = nuevoEstado ? "disponible" : "no disponible";
-
-  var confirmado = confirm(
-    '¿Desea marcar "' + producto.nombre + '" como ' + textoEstado + '?'
-  );
-
-  if (confirmado) {
-    producto.disponible = nuevoEstado;
-    alert('Producto actualizado: ahora está ' + textoEstado + '.');
-    renderTablaProductos();
-  }
-}
-
-// ===== CARGAR FORMULARIO DE PRODUCTO (edición) =====
-/**
- * Si hay ?id= en la URL, pre-llena el formulario para edición.
- */
-function cargarFormProducto() {
-  var params = new URLSearchParams(window.location.search);
-  var id = parseInt(params.get("id"));
-
-  if (!id) return; // Modo creación
-
-  var producto = productos.find(function(p) { return p.id === id; });
+  var producto = _productosCache.find(function(p) { return p.id === id; });
   if (!producto) return;
 
-  // Actualizar título
-  var titulo = document.getElementById("form-titulo");
-  if (titulo) titulo.textContent = "Editar Producto";
+  var nuevoEstado = !producto.disponible;
+  if (!confirm('¿Marcar "' + producto.nombre + '" como ' + (nuevoEstado ? "disponible" : "no disponible") + '?')) return;
 
-  // Llenar campos
-  var campos = {
-    "f-nombre": producto.nombre,
-    "f-descripcion": producto.descripcion,
-    "f-categoria": producto.categoria,
-    "f-precio": producto.precio,
-    "f-disponible": producto.disponible ? "true" : "false"
-  };
+  apiPatch("/productos/" + id + "/cambiar-disponibilidad/").then(function(resp) {
+    producto.disponible = resp.disponible;
+    renderTablaProductos();
+  }).catch(function() { alert("Error al cambiar disponibilidad."); });
+}
 
-  for (var campo in campos) {
-    var el = document.getElementById(campo);
-    if (el) el.value = campos[campo];
-  }
+// ===== CARGAR FORMULARIO (edición) =====
+function cargarFormProducto() {
+  var id = new URLSearchParams(window.location.search).get("id");
+  if (!id) return;
+
+  apiGet("/productos/" + id + "/").then(function(p) {
+    var titulo = document.getElementById("form-titulo");
+    if (titulo) titulo.textContent = "Editar Producto";
+
+    var map = {
+      "f-nombre": p.nombre,
+      "f-descripcion": p.descripcion,
+      "f-categoria": p.categoria,
+      "f-precio": parseFloat(p.precio),
+      "f-disponible": p.disponible ? "true" : "false"
+    };
+    for (var k in map) {
+      var el = document.getElementById(k);
+      if (el) el.value = map[k];
+    }
+  });
 }
 
 // ===== GUARDAR PRODUCTO =====
-/**
- * Valida y "guarda" (simula) el producto desde el formulario.
- */
 function guardarProducto(event) {
   event.preventDefault();
   var valido = true;
-
   var obligatorios = ["f-nombre", "f-categoria", "f-precio", "f-disponible"];
 
-  obligatorios.forEach(function(id) {
-    var campo = document.getElementById(id);
-    var error = document.getElementById(id + "-error");
+  obligatorios.forEach(function(fid) {
+    var campo = document.getElementById(fid);
+    var error = document.getElementById(fid + "-error");
     if (!campo || !campo.value.toString().trim()) {
       if (error) error.style.display = "block";
       if (campo) campo.classList.add("is-invalid");
@@ -126,19 +102,31 @@ function guardarProducto(event) {
     }
   });
 
-  // Validar precio positivo
   var precioEl = document.getElementById("f-precio");
-  var precioError = document.getElementById("f-precio-error");
-  if (precioEl && precioEl.value) {
-    if (parseFloat(precioEl.value) <= 0) {
-      if (precioError) { precioError.textContent = "El precio debe ser mayor a 0."; precioError.style.display = "block"; }
-      precioEl.classList.add("is-invalid");
-      valido = false;
-    }
+  if (precioEl && precioEl.value && parseFloat(precioEl.value) <= 0) {
+    var precioErr = document.getElementById("f-precio-error");
+    if (precioErr) { precioErr.textContent = "El precio debe ser mayor a 0."; precioErr.style.display = "block"; }
+    precioEl.classList.add("is-invalid");
+    valido = false;
   }
 
-  if (valido) {
+  if (!valido) return;
+
+  var datos = {
+    nombre: document.getElementById("f-nombre").value.trim(),
+    descripcion: document.getElementById("f-descripcion").value.trim(),
+    categoria: document.getElementById("f-categoria").value,
+    precio: parseFloat(document.getElementById("f-precio").value),
+    disponible: document.getElementById("f-disponible").value === "true"
+  };
+
+  var id = new URLSearchParams(window.location.search).get("id");
+  var promesa = id ? apiPut("/productos/" + id + "/", datos) : apiPost("/productos/", datos);
+
+  promesa.then(function() {
     alert("Producto guardado correctamente.");
     window.location.href = "productos.html";
-  }
+  }).catch(function(err) {
+    alert("Error al guardar: " + JSON.stringify(err));
+  });
 }

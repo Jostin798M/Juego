@@ -123,37 +123,15 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/datos.js"></script>
+  <script src="../js/api.js"></script>
   <script src="../js/pedidos.js"></script>
   <script>
-    // ===== MOSTRAR/OCULTAR CAMPOS SEGÚN TIPO =====
     function toggleTipoPedido() {
       var tipo = document.getElementById("f-tipo").value;
       document.getElementById("bloque-cliente").style.display = tipo === "cliente" ? "block" : "none";
       document.getElementById("bloque-mesa").style.display = tipo === "mesa" ? "block" : "none";
     }
-
-    // ===== LLENAR SELECT DE CLIENTES =====
-    var selectCliente = document.getElementById("f-cliente");
-    clientes.forEach(function(c) {
-      if (c.estado === "activo") {
-        var opt = document.createElement("option");
-        opt.value = c.id;
-        opt.textContent = c.nombres + " " + c.apellidos;
-        selectCliente.appendChild(opt);
-      }
-    });
-
-    // ===== LLENAR SELECT DE PRODUCTOS DISPONIBLES =====
-    var selectProd = document.getElementById("f-producto");
-    productos.forEach(function(p) {
-      if (p.disponible) {
-        var opt = document.createElement("option");
-        opt.value = p.id;
-        opt.textContent = p.nombre + " — $" + p.precio.toFixed(2);
-        selectProd.appendChild(opt);
-      }
-    });
+    iniciarFormPedido();
   </script>
 
 </body>
