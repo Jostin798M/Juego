@@ -68,7 +68,7 @@ if %errorlevel% neq 0 (
 REM ---- Crear superusuario si no existe ----
 echo.
 echo [4/4] Creando superusuario admin / 1234...
-python manage.py shell -c "from django.contrib.auth.models import User; User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin','admin@brewmanager.com','1234'); print('Superusuario listo.')"
+python crear_admin.py
 
 echo.
 echo ============================================
