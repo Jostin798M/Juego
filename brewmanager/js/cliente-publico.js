@@ -102,9 +102,10 @@ function confirmarPedidoCliente() {
     fecha: new Date().toLocaleString("es-EC")
   };
   pedidos.push(nuevo);
+  guardarStorage("pedidos");
 
   var mesaObj = mesas.find(function(m) { return m.numero === mesa; });
-  if (mesaObj) mesaObj.estado = "ocupada";
+  if (mesaObj) { mesaObj.estado = "ocupada"; guardarStorage("mesas"); }
 
   window.location.href = "cliente-estado.html?id=" + nuevo.id;
 }

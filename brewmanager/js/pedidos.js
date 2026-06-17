@@ -97,10 +97,12 @@ function cambiarEstadoPedido(id) {
 
   if (opcion === "1") {
     pedido.estado = siguienteEstado;
+    guardarStorage('pedidos');
     alert('Estado cambiado a "' + siguienteEstado + '".');
     renderTablaPedidos();
   } else if (opcion === "2") {
     pedido.estado = "cancelado";
+    guardarStorage("pedidos");
     alert('Pedido cancelado.');
     renderTablaPedidos();
   }
@@ -305,6 +307,25 @@ function guardarPedido(event) {
     return;
   }
 
-  alert("Pedido registrado correctamente. Total: $" + calcularTotal(productosEnPedido).toFixed(2));
+  var totalNuevo = calcularTotal(productosEnPedido);
+  var tipo = document.getElementById("f-tipo").value;
+  var clienteEl = document.getElementById("f-cliente");
+  var mesaEl = document.getElementById("f-mesa");
+  var nombreCliente = null;
+  if (tipo === "cliente" && clienteEl.value) {
+    nombreCliente = clienteEl.options[clienteEl.selectedIndex].text;
+  }
+  var nuevoPedido = {
+    id: pedidos.length ? Math.max.apply(null, pedidos.map(function(p){return p.id;})) + 1 : 1,
+    cliente: nombreCliente,
+    mesa: tipo === "mesa" ? parseInt(mesaEl.value) : null,
+    productos: productosEnPedido.slice(),
+    total: totalNuevo,
+    estado: "pendiente",
+    fecha: new Date().toLocaleString("es-EC")
+  };
+  pedidos.push(nuevoPedido);
+  guardarStorage("pedidos");
+  alert("Pedido registrado correctamente. Total: $" + totalNuevo.toFixed(2));
   window.location.href = "pedidos.html";
 }

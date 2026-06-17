@@ -66,6 +66,7 @@ function cambiarDisponibilidad(id) {
 
   if (confirmado) {
     producto.disponible = nuevoEstado;
+    guardarStorage('productos');
     alert('Producto actualizado: ahora está ' + textoEstado + '.');
     renderTablaProductos();
   }
@@ -138,6 +139,23 @@ function guardarProducto(event) {
   }
 
   if (valido) {
+    var params = new URLSearchParams(window.location.search);
+    var idEdit = parseInt(params.get("id"));
+    var nuevo = {
+      id: idEdit || (productos.length ? Math.max.apply(null, productos.map(function(p){return p.id;})) + 1 : 1),
+      nombre: document.getElementById("f-nombre").value.trim(),
+      descripcion: document.getElementById("f-descripcion").value.trim(),
+      categoria: document.getElementById("f-categoria").value,
+      precio: parseFloat(document.getElementById("f-precio").value),
+      disponible: document.getElementById("f-disponible").value === "true"
+    };
+    if (idEdit) {
+      var idx = productos.findIndex(function(p){return p.id===idEdit;});
+      if (idx !== -1) productos[idx] = nuevo;
+    } else {
+      productos.push(nuevo);
+    }
+    guardarStorage("productos");
     alert("Producto guardado correctamente.");
     window.location.href = "productos.html";
   }

@@ -98,6 +98,7 @@ function cambiarEstadoCliente(id) {
   if (confirmado) {
     // Actualizar en el array (en memoria)
     cliente.estado = nuevoEstado;
+    guardarStorage('clientes');
     alert('Estado actualizado a "' + nuevoEstado + '" correctamente.');
     // Re-renderizar la tabla
     renderTablaClientes();
@@ -234,6 +235,7 @@ function guardarCliente(event) {
   }
 
   if (valido) {
+    guardarStorage("clientes");
     alert("Cliente guardado correctamente.");
     window.location.href = "clientes.html";
   }

@@ -46,6 +46,7 @@ function toggleMesa(id) {
   var mesa = mesas.find(function(m) { return m.id === id; });
   if (!mesa) return;
   mesa.estado = mesa.estado === "libre" ? "ocupada" : "libre";
+  guardarStorage("mesas");
   renderMesas();
 }
 
@@ -102,6 +103,8 @@ function avanzarEstadoPedido(id) {
       });
       if (mesa && otrosPedidos.length === 0) mesa.estado = "libre";
     }
+    guardarStorage("pedidos");
+    guardarStorage("mesas");
     alert('Pedido #' + id + ' avanzado a "' + pedido.estado + '".');
     renderMisPedidos();
   }
@@ -206,10 +209,11 @@ function guardarPedidoMesero(event) {
     fecha: new Date().toLocaleString("es-EC")
   };
   pedidos.push(nuevo);
+  guardarStorage("pedidos");
 
   if (nuevo.mesa) {
     var mesa = mesas.find(function(m) { return m.numero === nuevo.mesa; });
-    if (mesa) mesa.estado = "ocupada";
+    if (mesa) { mesa.estado = "ocupada"; guardarStorage("mesas"); }
   }
 
   alert("Pedido #" + nuevo.id + " registrado. Total: $" + total.toFixed(2));
